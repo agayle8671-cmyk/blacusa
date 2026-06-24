@@ -1,0 +1,107 @@
+{
+  "project_name": "BlacUSA",
+  "domain": "News & Civic Utility",
+  "theme": "Light Theme",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) crossed with Archetype 5 (Luxury/Editorial) for cultural depth and dignity",
+  "design_philosophy": {
+    "core_principles": [
+      "Trauma-Informed Design: Dignified treatment of victims, no sensationalism, respectful spacing.",
+      "Archival Index Aesthetic: Clean grids, clear labeling, high-end editorial feel.",
+      "Tokenized Theming: Fully CSS variable-driven for easy owner recoloring.",
+      "Solutions Journalism Focus: Empowering, clear, high-contrast readability."
+    ]
+  },
+  "color_system": {
+    "strategy": "Pan-African inspired but highly muted and professional. Deep, grounded, and dignified. CSS variables must be implemented in index.css.",
+    "tokens": {
+      "--background": "#FAF9F6",
+      "--foreground": "#111111",
+      "--card": "#FFFFFF",
+      "--card-foreground": "#111111",
+      "--popover": "#FFFFFF",
+      "--popover-foreground": "#111111",
+      "--primary": "#1A1A1A",
+      "--primary-foreground": "#FFFFFF",
+      "--secondary": "#EAE8E3",
+      "--secondary-foreground": "#1A1A1A",
+      "--muted": "#F2F0EB",
+      "--muted-foreground": "#666666",
+      "--accent": "#8C271E",
+      "--accent-foreground": "#FFFFFF",
+      "--destructive": "#7A1C14",
+      "--destructive-foreground": "#FFFFFF",
+      "--border": "#DCDAD2",
+      "--input": "#DCDAD2",
+      "--ring": "#8C271E",
+      "--radius": "0px"
+    },
+    "description": "Background is an off-white linen to reduce reading fatigue. Primary is a rich classic black for authority. Accent is a dignified crimson (not blinding red) for alerts, breaking news, and cold case tags."
+  },
+  "typography": {
+    "strategy": "High-end editorial. Oversized, high-contrast serif for headings to give magazine-like gravitas. Clean geometric sans for UI/Body to maintain Swiss-level clarity.",
+    "font_families": {
+      "heading": "'Cormorant Garamond', serif",
+      "body": "'Satoshi', sans-serif",
+      "mono": "'JetBrains Mono', monospace"
+    },
+    "scale": {
+      "h1": "text-5xl sm:text-6xl tracking-tighter leading-none font-medium",
+      "h2": "text-3xl sm:text-4xl tracking-tight leading-tight",
+      "h3": "text-xl sm:text-2xl tracking-tight",
+      "body_large": "text-lg leading-relaxed",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm uppercase tracking-[0.2em] font-medium"
+    }
+  },
+  "layout_spacing": {
+    "strategy": "Generous spacing. Bento Grids for homepage features, Swiss grid (strict alignment) for article layouts.",
+    "container": "max-w-[1400px] mx-auto px-6 md:px-12",
+    "section_gap": "py-24 md:py-32",
+    "grid_system": {
+      "homepage": "Bento style. 12-column grid. Asymmetrical feature blocks.",
+      "cold_case": "Archival Index style. Strict rows with 1px bottom borders (border-border), clear metadata columns."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "Solid dark background (--primary), white text, rounded-none, hover:bg-black/80 transition-colors",
+      "secondary": "Border 1px solid --border, transparent background, text --foreground, hover:bg-muted"
+    },
+    "cards": {
+      "news_article": "No physical borders. Large image, tightly tracked headline underneath, overline category tag.",
+      "cold_case": "Flat, muted background (--muted), no shadow, 1px border. Extremely respectful, no 'true crime' aesthetic. Focus on data clarity."
+    },
+    "navigation": {
+      "header": "Sticky, glassmorphism but minimal blur (bg-background/90 backdrop-blur-md), bottom border 1px solid --border. Includes Breaking News ticker (slow marquee)."
+    }
+  },
+  "media": {
+    "image_treatment": "High contrast, slight desaturation on news images for editorial consistency. No heavy gradient overlays, use gradient-to-t black/40 to transparent only where text contrast is strictly needed.",
+    "image_urls": {
+      "hero_solutions": {
+        "url": "https://images.unsplash.com/photo-1573497701240-345a300b8d36?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxBZnJpY2FuJTIwQW1lcmljYW4lMjBjb21tdW5pdHklMjB3b3JraW5nJTIwdG9nZXRoZXJ8ZW58MHx8fHwxNzgyMjc2NDMzfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Five people sitting at table and talking - perfect for Solutions Journalism/Co-op representation."
+      },
+      "cold_case_bg": {
+        "url": "https://images.unsplash.com/photo-1518729406574-12149251ac0c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxjaXR5JTIwc3RyZWV0JTIwcmVzcGVjdGZ1bCUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3ODIyNzY0MzN8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Respectful city street. Use as muted background for Cold Case map/header section."
+      },
+      "coop_meeting": {
+        "url": "https://images.pexels.com/photos/8761679/pexels-photo-8761679.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Black professionals meeting. Use for Digital News Co-op/Membership page."
+      }
+    }
+  },
+  "motion_interactions": {
+    "strategy": "Intentional, subtle motion. No bouncy animations.",
+    "hover_states": "Text color shifts slightly, images scale 1.02x slowly over 0.6s.",
+    "page_load": "Fade in with slight upward translation."
+  },
+  "instructions_to_main_agent": [
+    "INSTALLATION: You must install lucide-react for icons, framer-motion for subtle animations, and react-fast-marquee for the breaking news ticker.",
+    "STYLING: Implement the provided CSS variable tokens in the global index.css. Do not hardcode hex values in Tailwind classes; use the Tailwind semantic equivalents (e.g., bg-background, text-primary, text-accent).",
+    "TYPOGRAPHY: Add 'Cormorant Garamond' and 'Satoshi' to the project via Google Fonts/Fontsource and update tailwind.config.js.",
+    "TESTING: Every interactive element MUST have a data-testid attribute in kebab-case (e.g., data-testid='submit-tip-button').",
+    "TONE: Ensure the Cold Case section feels like a dignified public record, not a sensational true crime blog. Flat surfaces, clear typography, no drop shadows."
+  ]
+}

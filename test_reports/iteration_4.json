@@ -1,0 +1,40 @@
+{
+  "summary": "Iteration 4 testing complete. All 19 new backend tests pass standalone covering reader auth (register/login/me/role-block), comments auth-gating (401 anon, verified=true reader, public shows only approved), image optimize (3000px JPEG -> <=2000px JPEG with smaller bytes), scheduled publishing (future hides article publicly + 404 detail, admin sees it, past visible), and homepage curation (admin GET/PUT, public /api/homepage reflects, /api/articles?category= honors section ordering). Frontend: register -> header-account-name shows first name + header-signout; signout -> header-signin; article page shows comment-signin-gate + comment-signin-link for anonymous; logged-in reader sees comment-body + comment-submit and gets comment-success (pending review) on submit; reader visiting /admin redirects to /admin/login; admin login works and reaches /admin; /admin/homepage exposes admin-homepage + homepage-lead + homepage-save testids; article editor exposes article-publish-at (datetime-local) field; account-error fires on wrong creds. The article slug 'busa-preview' referenced in the request is NOT seeded — used 'the-county-with-no-pharmacy' instead (slug just needs to exist).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/me", "issue": "Returned email is lowercased (by design at register); tests must compare case-insensitively. Not a bug."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_blacusa_iter4.py",
+    "/app/test_reports/pytest/pytest_iter4_results.xml"
+  ],
+  "action_items": [
+    "Old test file /app/backend/tests/test_blacusa_uploads_comments_bounds.py has 5 EXPECTED failures because anonymous comment posting is now auth-gated by design (was 200/400/404, now 401). Recommend updating those tests to obtain a reader token first, or delete them since /app/backend/tests/test_blacusa_iter4.py covers the same behavior.",
+    "Delete any TEST_-prefixed reader accounts (TEST_reader_*, TEST_uir*, TEST_uireader_*, TEST_admchk_*) and TEST_-prefixed articles (test-sched-*, test-past-*) created during testing. The iter4 fixtures auto-cleanup the scheduled articles; reader accounts and a few pending comments may remain.",
+    "article-publish-clear button only renders when publish_at has a value (verified by inspection of editor). Confirm this is intended (cleaner UI when empty)."
+  ],
+  "critical_code_review_comments": [
+    "storage.py still uses sync requests inside async handlers, but iter-4 now wraps put_object/get_object/optimize_image with asyncio.to_thread in server.py — good fix.",
+    "/api/admin/upload reads entire body into memory before the 15MB check; consider streaming or pre-checking Content-Length for V2.",
+    "/api/articles/{slug}/comments GET still returns [] for unknown slugs (doesn't 404) while POST returns 404 — slight inconsistency but acceptable to avoid leaking article existence.",
+    "/api/auth/login returns the same 401 for missing-user vs wrong-password — good (prevents email enumeration).",
+    "RegisterIn payload trims name but stores password without server-side complexity check beyond min-length 8.",
+    "Homepage curation save endpoint accepts arbitrary slugs in lead/also_leading/latest/sections without verifying they exist; harmless because resolve() filters by by_slug, but could be validated for admin UX feedback."
+  ],
+  "updated_files": ["/app/backend/tests/test_blacusa_iter4.py"],
+  "success_rate": {"backend": "100% (19/19 iter-4 new)", "frontend": "100% on tested flows"},
+  "test_credentials": "Admin: admin@blacusa.com / BlacUSA2026!. Reader accounts created dynamically per-test with TEST_-prefixed emails and password 'readerpass123'. Token in localStorage key 'blacusa-token' (unified).",
+  "seed_data_creation": "Created several TEST_-prefixed reader users via /api/auth/register and ~3 TEST_UI_comment_* pending comments on /article/the-county-with-no-pharmacy during UI testing. Scheduled-article fixtures auto-clean. Main agent may purge TEST_-prefixed users + pending comments before going live.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iter-4 features all green. New backend test file: /app/backend/tests/test_blacusa_iter4.py. JUnit XML: /app/test_reports/pytest/pytest_iter4_results.xml. The previous iter-3 file (test_blacusa_uploads_comments_bounds.py) is now partially stale because anonymous comment POST became 401 by design — update or delete in next iteration. 'busa-preview' is NOT a seeded article slug; use any real slug like 'the-county-with-no-pharmacy' for article-level UI tests. Frontend testids verified: header-account-name, header-signout, header-signin, comment-signin-gate, comment-signin-link, comment-body, comment-submit, comment-success, admin-homepage, homepage-lead, homepage-save, article-publish-at, account-error.",
+  "rca of the issue": "N/A - no functional bugs found"
+}
