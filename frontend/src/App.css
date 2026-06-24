@@ -1,0 +1,4 @@
+/* BlacUSA — global styles live in index.css (theme tokens + utilities). */
+.App {
+    min-height: 100vh;
+}

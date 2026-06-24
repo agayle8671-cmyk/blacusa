@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 2 (Admin CMS + Map Clustering + Radius Search) tested end-to-end. Backend: 21/21 new admin/auth/radius pytest cases pass (test_blacusa_admin.py) on top of 22/22 iteration-1 cases. Frontend: admin login (wrong/correct creds), unauthenticated redirect, logout, articles auto-slug + create persists publicly, cases/tips/audience pages, map view with leaflet.markercluster + legend, radius search (Chicago/50mi -> 1 case + red circle) + clear all verified working. Zero runtime/Leaflet errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/articles seed", "issue": "Existing seeded articles in DB have is_published=None (stale data from older seed). Admin UI 'is_published' check is strict equality (a.is_published) so they show as 'Draft' even though public query ($ne: False) still returns them. Either backfill is_published=True via a startup migration, or relax AdminArticles to treat undefined/null as published."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AdminArticles list", "issue": "All 8 seeded articles render as 'DRAFT' badge because their stored is_published is null (admin uses strict `a.is_published` check). Newly created articles correctly show LIVE.", "selector": "/admin/articles row Live/Draft pill", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/cold-cases radius controls", "issues": ["When 'Anywhere in the U.S.' is selected the miles select is hidden — intentional but the radius-miles-select data-testid is therefore absent until a city is chosen (test expecting it pre-selection will fail)."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_blacusa_admin.py",
+    "/app/backend/tests/test_blacusa_api.py",
+    "/app/test_reports/pytest/pytest_admin_results.xml",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Backfill is_published=True on existing article docs (e.g., in seed_database, run db.articles.update_many({'is_published': {'$exists': False}}, {'$set': {'is_published': True}})), OR change AdminArticles.jsx line 43 to `a.is_published !== false` so undefined/null is treated as Live (matches the public-list query semantics)."
+  ],
+  "critical_code_review_comments": [
+    "server.py get_current_admin: falls back to cookie 'access_token' even though product spec says JWT Bearer only/no httpOnly cookies — harmless but inconsistent.",
+    "server.py admin_create_article/case: returns the in-memory doc with `doc.pop('_id', None)` after insert_one — fine, but insert_one mutates the dict to include ObjectId; pop is correct. Good.",
+    "server.py login: no brute-force lockout (playbook calls for 5-fail lockout). Not implemented; report-only since spec says 'JWT Bearer single seeded admin'.",
+    "server.py /admin/tips PATCH allows 'reviewed' as well as approved/rejected — matches auth_testing.md expectations.",
+    "Console hydration warning observed on /cold-cases ('<span> cannot be a child of <option>') originates from the Emergent visual-editor instrumentation injecting <span data-ve-dynamic> inside <option> elements via the dev runtime, not from app code. Will not appear in production build. Reported as informational only.",
+    "AdminArticles 'Draft/Live' badge uses strict truthy check on is_published — should use !== false to mirror the public-list query `{is_published: {$ne: False}}`.",
+    "All admin pages have kebab-case data-testid attributes; admin-email and admin-password were named differently from the review prompt's 'admin-login-email/-password' — test scripts must use the actual ids (admin-email/admin-password)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_blacusa_admin.py (new, 21 tests)"
+  ],
+  "success_rate": {"backend": "100% (21/21 new + 22/22 prior)", "frontend": "100% of critical flows (login, articles CRUD, cases CRUD, tips queue, audience, map cluster, radius search, logout)"},
+  "test_credentials": "admin@blacusa.com / BlacUSA2026! (seeded). JWT Bearer in localStorage key blacusa-admin-token.",
+  "seed_data_creation": "Backend seeds 8 articles + 10 cold cases on startup (idempotent). Admin user is upserted (password updated if changed). Test artifacts use TEST_ prefix; created article 'ui-test-auto-slug-article' was deleted after the UI smoke test.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Login data-testids are admin-email / admin-password / admin-login-submit / admin-login-error (NOT admin-login-email/-password). Tips filter testids use the raw API key: tips-filter-all, tips-filter-pending_review, tips-filter-approved, tips-filter-rejected. radius-miles-select is rendered only after a city is chosen in radius-city-select. Map clusters render via leaflet.markercluster — assertions should look at the legend 'Clustered' badge + total .leaflet-marker-icon count (10 cases -> 8 markers indicates clustering working). The seeded articles show 'Draft' in admin until is_published is backfilled (see action_items).",
+  "rca_of_the_issue": "Seeded articles -> show 'Draft' in admin: root cause = older seed_database iteration inserted docs without is_published; the field was added in a later version but the seeder only inserts when count==0, so the legacy docs persist with is_published missing. Mongo stores absent fields as nothing => find() returns is_published=None to Python. AdminArticles.jsx uses `{a.is_published ? Live : Draft}` (truthy) instead of `a.is_published !== false`. Fix either by backfilling on startup (`db.articles.update_many({'is_published':{'$exists':False}},{'$set':{'is_published':True}})`) inside seed_database, or by changing the badge condition in AdminArticles.jsx."
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BlacUSA — System Architecture (One Page)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF9F6; --ink:#111111; --crimson:#8C271E; --muted:#666; --line:#DCDAD2;
+    --card:#FFFFFF; --soft:#F2F0EB; --dark:#1A1A1A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#e9e7e0;font-family:'Satoshi',system-ui,sans-serif;color:var(--ink);padding:24px;}
+  .page{
+    width:1100px;margin:0 auto;background:var(--paper);border:1px solid var(--line);
+    padding:38px 44px;box-shadow:0 12px 40px rgba(0,0,0,.12);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .overline{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:9px;color:var(--muted);}
+  h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:40px;line-height:1;letter-spacing:-.01em;}
+  h1 .c{color:var(--crimson);}
+  .sub{font-size:12px;color:var(--muted);margin-top:6px;}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px;}
+  .head .tag{text-align:right;}
+  .layer{margin-bottom:14px;}
+  .layer-label{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:9px;color:var(--crimson);margin-bottom:7px;}
+  .row{display:flex;gap:12px;}
+  .box{flex:1;border:1px solid var(--line);background:var(--card);padding:12px 14px;}
+  .box.dark{background:var(--dark);color:#fff;border-color:var(--dark);}
+  .box.crimson{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+  .box.soft{background:var(--soft);}
+  .box h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:19px;line-height:1.05;margin-bottom:4px;}
+  .box .k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-bottom:6px;}
+  .box ul{list-style:none;font-size:11px;line-height:1.5;}
+  .box ul li{padding-left:11px;position:relative;}
+  .box ul li::before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;background:var(--crimson);}
+  .box.dark ul li::before,.box.crimson ul li::before{background:#fff;}
+  .flow{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--crimson);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin:9px 0;}
+  .flow::before,.flow::after{content:"";height:1px;background:var(--line);flex:1;}
+  .arrow{text-align:center;color:var(--crimson);font-size:15px;line-height:1;margin:4px 0;}
+  .split{display:flex;gap:12px;}
+  .split .col{flex:1;}
+  .pill{display:inline-block;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;letter-spacing:.08em;margin:2px 3px 0 0;}
+  .legend{display:flex;gap:18px;margin-top:18px;border-top:1px solid var(--line);padding-top:12px;font-size:10px;color:var(--muted);}
+  .legend .sw{display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line);}
+  .foot{display:flex;justify-content:space-between;margin-top:14px;font-size:9.5px;color:var(--muted);}
+  @media print{ body{background:#fff;padding:0;} .page{box-shadow:none;border:none;width:auto;} @page{size:A3 landscape;margin:10mm;} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div>
+      <h1>Blac<span class="c">USA</span></h1>
+      <div class="sub">System Architecture &middot; One-Page Overview &middot; Iteration 4 (2026-06)</div>
+    </div>
+    <div class="tag">
+      <div class="overline">Algorithm-proof news for Black America</div>
+      <div class="sub" style="margin-top:4px;">React 19 &middot; FastAPI &middot; MongoDB &middot; Object Storage</div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="layer">
+    <div class="layer-label">1 · Clients (Browser)</div>
+    <div class="row">
+      <div class="box">
+        <div class="k">Public Site</div>
+        <h3>Readers &amp; Community</h3>
+        <ul>
+          <li>Home / Articles / 6 Section beats</li>
+          <li>Cold Case DB — list · map · case files</li>
+          <li>Submit Tip · Membership · About</li>
+          <li>Reader accounts &amp; verified comments</li>
+        </ul>
+      </div>
+      <div class="box dark">
+        <div class="k">/admin · Newsroom Console</div>
+        <h3>Editorial Staff</h3>
+        <ul>
+          <li>Articles CRUD + scheduled publishing</li>
+          <li>Cold Cases CRUD · Tip &amp; Comment moderation</li>
+          <li>Front-Page curation · Audience + CSV</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow">HTTPS &nbsp;·&nbsp; JWT Bearer token (localStorage) &nbsp;·&nbsp; REACT_APP_BACKEND_URL + /api</div>
+
+  <!-- EDGE -->
+  <div class="layer">
+    <div class="layer-label">2 · Edge / Routing</div>
+    <div class="row">
+      <div class="box soft">
+        <div class="k">Kubernetes Ingress (dev) · Vercel + Railway (prod)</div>
+        <h3>Path-based routing</h3>
+        <ul>
+          <li><span class="mono">/api/*</span> &rarr; Backend (FastAPI :8001)</li>
+          <li><span class="mono">/*</span> &rarr; Frontend (React :3000)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <div class="split">
+    <!-- FRONTEND -->
+    <div class="col">
+      <div class="layer-label">3 · Frontend — React 19 SPA</div>
+      <div class="box">
+        <div class="k">CRA · React Router 7 · React Query 5</div>
+        <h3>Presentation &amp; State</h3>
+        <ul>
+          <li>Tailwind + shadcn/ui · tokenized theme (4 presets)</li>
+          <li>Leaflet + markercluster (radius &amp; bounds search)</li>
+          <li>AuthProvider · framer-motion · sonner</li>
+        </ul>
+        <div style="margin-top:8px;">
+          <span class="pill">Cormorant Garamond</span><span class="pill">Satoshi</span><span class="pill">JetBrains Mono</span>
+        </div>
+      </div>
+    </div>
+    <!-- BACKEND -->
+    <div class="col">
+      <div class="layer-label">4 · Backend — FastAPI (:8001, /api)</div>
+      <div class="box">
+        <div class="k">Motor (async) · Pydantic 2</div>
+        <h3>API &amp; Business Logic</h3>
+        <ul>
+          <li>JWT auth · bcrypt · roles: admin / reader</li>
+          <li>Content · Cold cases (haversine + bounds)</li>
+          <li>Moderation queues · homepage curation</li>
+          <li>Pillow image optimize (&le;2000px) via to_thread</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">&#9660;</div>
+
+  <!-- DATA -->
+  <div class="layer">
+    <div class="layer-label">5 · Data &amp; Storage</div>
+    <div class="row">
+      <div class="box">
+        <div class="k">MongoDB (DB_NAME)</div>
+        <h3>Primary Database</h3>
+        <ul>
+          <li>articles · cold_cases · comments · tips</li>
+          <li>users · subscribers · memberships</li>
+          <li>files (metadata) · site_config (homepage)</li>
+        </ul>
+      </div>
+      <div class="box crimson">
+        <div class="k">Emergent Object Storage</div>
+        <h3>Image Assets</h3>
+        <ul>
+          <li>Optimized uploads (hero / portraits)</li>
+          <li>Served publicly via <span class="mono">/api/files/{path}</span></li>
+        </ul>
+      </div>
+      <div class="box soft">
+        <div class="k">Cross-Cutting</div>
+        <h3>Policies</h3>
+        <ul>
+          <li>Trauma-informed · moderation before publish</li>
+          <li>Scheduled publish (read-time eval)</li>
+          <li>PIPEDA / CCPA · Do Not Sell or Share</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="sw" style="background:#fff;"></span>Public surface</span>
+    <span><span class="sw" style="background:#1A1A1A;border-color:#1A1A1A;"></span>Admin / console</span>
+    <span><span class="sw" style="background:#8C271E;border-color:#8C271E;"></span>External service</span>
+    <span><span class="sw" style="background:#F2F0EB;"></span>Routing / policy</span>
+  </div>
+
+  <div class="foot">
+    <span>Key request flow: Browser &rarr; Ingress (/api) &rarr; FastAPI &rarr; MongoDB / Object Storage &rarr; JSON / image bytes &rarr; React render</span>
+    <span class="mono">blacusa.com</span>
+  </div>
+
+</div>
+</body>
+</html>
