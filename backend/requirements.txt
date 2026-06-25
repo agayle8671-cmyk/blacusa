@@ -1,27 +1,21 @@
-# ── Private wheels (not on PyPI) ──────────────────────────────────────────────
-emergentintegrations @ https://customer-assets.emergentagent.com/internal-asset/library/emergentintegrations-0.2.0-py3-none-any.whl
-litellm @ https://customer-assets.emergentagent.com/internal-asset/library/litellm-1.80.0-py3-none-any.whl#sha256=adf398c513273de9341f61822296c6b2145f7f2dc4a69daf3ac04829f5bde3f8
+# BlacUSA Backend — Production Requirements
+# Only packages actually imported by server.py and scraper.py
 
 # ── Core API framework ─────────────────────────────────────────────────────────
 fastapi==0.110.1
 uvicorn==0.25.0
 starlette==0.37.2
 python-multipart==0.0.32
-pydantic==2.13.4
-pydantic_core==2.46.4
+pydantic[email]==2.13.4
 python-dotenv==1.2.2
-email-validator==2.3.0
 
 # ── Database ───────────────────────────────────────────────────────────────────
 motor==3.3.1
 pymongo==4.6.3
-dnspython==2.8.0
 
 # ── Auth ───────────────────────────────────────────────────────────────────────
 PyJWT==2.13.0
 bcrypt==4.1.3
-python-jose==3.5.0
-passlib==1.7.4
 cryptography==49.0.0
 
 # ── Image processing ──────────────────────────────────────────────────────────
@@ -30,30 +24,11 @@ pillow==10.4.0
 # ── HTTP clients ──────────────────────────────────────────────────────────────
 httpx==0.28.1
 requests==2.34.2
-aiohttp==3.14.1
 
 # ── AI / Groq ─────────────────────────────────────────────────────────────────
 groq>=0.9.0
-openai==1.99.9
 
 # ── News scraper ──────────────────────────────────────────────────────────────
 feedparser>=6.0.11
 beautifulsoup4>=4.12.0
 lxml>=5.2.0
-
-# ── Object storage (Emergent) ─────────────────────────────────────────────────
-boto3==1.43.34
-botocore==1.43.34
-
-# ── Utilities ─────────────────────────────────────────────────────────────────
-anyio==4.14.0
-certifi==2026.6.17
-charset-normalizer==3.4.7
-click==8.4.1
-h11==0.16.0
-httpcore==1.0.9
-idna==3.18
-packaging==26.2
-typing_extensions==4.15.0
-annotated-types==0.7.0
-sniffio==1.3.1
