@@ -5,6 +5,14 @@ export const API = `${BACKEND_URL}/api`;
 
 const client = axios.create({ baseURL: API });
 
+client.interceptors.response.use((response) => {
+  const contentType = response.headers["content-type"] || "";
+  if (contentType.includes("text/html") || (typeof response.data === "string" && response.data.trim().startsWith("<!DOCTYPE"))) {
+    throw new Error("Expected JSON, but received HTML. Verify REACT_APP_BACKEND_URL environment variable.");
+  }
+  return response;
+});
+
 export const getArticles = (params = {}) =>
   client.get("/articles", { params }).then((r) => r.data);
 

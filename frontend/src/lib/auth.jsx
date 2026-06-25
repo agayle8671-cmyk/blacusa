@@ -16,6 +16,13 @@ adminClient.interceptors.request.use((config) => {
   if (t) config.headers.Authorization = `Bearer ${t}`;
   return config;
 });
+adminClient.interceptors.response.use((response) => {
+  const contentType = response.headers["content-type"] || "";
+  if (contentType.includes("text/html") || (typeof response.data === "string" && response.data.trim().startsWith("<!DOCTYPE"))) {
+    throw new Error("Expected JSON, but received HTML. Verify REACT_APP_BACKEND_URL environment variable.");
+  }
+  return response;
+});
 
 export function formatApiError(detail) {
   if (detail == null) return "Something went wrong. Please try again.";

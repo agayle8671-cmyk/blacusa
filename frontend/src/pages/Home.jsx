@@ -26,14 +26,15 @@ const SectionHead = ({ overline, title, to, cta }) => (
 
 export default function Home() {
   const { data: homepage } = useQuery({ queryKey: ["homepage"], queryFn: () => axios.get(`${API}/homepage`).then((r) => r.data) });
-  const { data: solutions = [] } = useQuery({ queryKey: ["solutions-home"], queryFn: () => getArticles({ solutions: true }) });
-  const { data: cases = [] } = useQuery({ queryKey: ["cases-home"], queryFn: () => getColdCases() });
+  const { data: solutions } = useQuery({ queryKey: ["solutions-home"], queryFn: () => getArticles({ solutions: true }) });
+  const { data: cases } = useQuery({ queryKey: ["cases-home"], queryFn: () => getColdCases() });
   const { data: stats } = useQuery({ queryKey: ["case-stats"], queryFn: getColdCaseStats });
 
-  const lead = homepage?.lead;
-  const secondary = homepage?.also_leading || [];
-  const latestRest = homepage?.latest || [];
-  const spotlightCases = cases.filter((c) => c.status !== "Solved").slice(0, 4);
+  const isHomepageObj = homepage && typeof homepage === "object";
+  const lead = isHomepageObj ? homepage.lead : null;
+  const secondary = isHomepageObj && Array.isArray(homepage.also_leading) ? homepage.also_leading : [];
+  const latestRest = isHomepageObj && Array.isArray(homepage.latest) ? homepage.latest : [];
+  const spotlightCases = Array.isArray(cases) ? cases.filter((c) => c.status !== "Solved").slice(0, 4) : [];
 
   return (
     <div className="bg-background">
@@ -85,14 +86,14 @@ export default function Home() {
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            {solutions.slice(0, 3).map((a) => (
+            {(Array.isArray(solutions) ? solutions : []).slice(0, 3).map((a) => (
               <Link
                 key={a.slug}
                 to={`/article/${a.slug}`}
                 data-testid={`solutions-card-${a.slug}`}
                 className="group flex flex-col border-t border-primary-foreground/25 pt-6"
               >
-                <span className="overline text-accent">{a.category.replace("-", " ")}</span>
+                <span className="overline text-accent">{(a.category || "").replace("-", " ")}</span>
                 <h3 className="mt-3 font-heading text-2xl font-medium leading-tight tracking-tight transition-colors group-hover:text-accent">
                   {a.title}
                 </h3>

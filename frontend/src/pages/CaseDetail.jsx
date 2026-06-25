@@ -20,7 +20,7 @@ export default function CaseDetail() {
   const { data: c, isLoading } = useQuery({ queryKey: ["case", caseNumber], queryFn: () => getColdCase(caseNumber) });
 
   if (isLoading) return <div className="px-6 py-32 text-center font-mono text-sm text-muted-foreground">Loading…</div>;
-  if (!c) return null;
+  if (!c || typeof c !== "object") return null;
 
   return (
     <div className="bg-background pb-24" data-testid="case-detail-page">

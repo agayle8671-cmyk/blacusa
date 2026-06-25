@@ -5,15 +5,16 @@ import { ArticleCard } from "@/components/ArticleCard";
 
 export default function CategoryPage() {
   const { slug } = useParams();
-  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: getCategories });
-  const { data: articles = [], isLoading } = useQuery({
+  const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: getCategories });
+  const { data: articles, isLoading } = useQuery({
     queryKey: ["category", slug],
     queryFn: () => getArticles({ category: slug }),
   });
 
-  const cat = categories.find((c) => c.slug === slug);
-  const lead = articles[0];
-  const rest = articles.slice(1);
+  const cat = Array.isArray(categories) ? categories.find((c) => c.slug === slug) : null;
+  const articlesArray = Array.isArray(articles) ? articles : [];
+  const lead = articlesArray[0];
+  const rest = articlesArray.slice(1);
 
   return (
     <div className="bg-background" data-testid="category-page">

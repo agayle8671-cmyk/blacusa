@@ -21,7 +21,7 @@ export default function ArticlePage() {
   if (isLoading) {
     return <div className="mx-auto max-w-2xl px-6 py-32 text-center font-mono text-sm text-muted-foreground">Loading…</div>;
   }
-  if (!data) return null;
+  if (!data || typeof data !== "object") return null;
   const { article, related } = data;
 
   return (

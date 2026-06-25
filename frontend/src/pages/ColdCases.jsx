@@ -234,7 +234,7 @@ export default function ColdCases() {
                 <span key={i} className={`overline text-muted-foreground ${i === 0 ? "col-span-4" : i === 1 ? "col-span-2" : i === 2 ? "col-span-3" : i === 3 ? "col-span-2" : "col-span-1 text-right"}`}>{h}</span>
               ))}
             </div>
-            {cases.map((c) => (
+            {(Array.isArray(cases) ? cases : []).map((c) => (
               <CaseRow key={c.case_number} c={c} />
             ))}
             {!isLoading && cases.length === 0 && (
