@@ -886,13 +886,23 @@ async def admin_delete_comment(comment_id: str, admin: dict = Depends(get_curren
 
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_origins_str = os.environ.get('CORS_ORIGINS', '*')
+if cors_origins_str == '*':
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+        allow_origin_regex=r"https?://.*",
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+        allow_origins=cors_origins_str.split(','),
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 logging.basicConfig(
     level=logging.INFO,
