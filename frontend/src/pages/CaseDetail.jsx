@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Phone, MapPin, Calendar, Shield } from "lucide-react";
-import { getColdCase } from "@/lib/api";
+import { getColdCase, resolveImageUrl } from "@/lib/api";
 import { StatusBadge, TYPE_COLOR } from "@/components/CaseRow";
 import { CaseMap } from "@/components/CaseMap";
 
@@ -35,7 +35,7 @@ export default function CaseDetail() {
         <div className="lg:col-span-7">
           {c.image && (
             <div className="mb-6 overflow-hidden border border-border" data-testid="case-portrait">
-              <img src={c.image} alt={c.name} className="img-editorial aspect-[3/2] w-full object-cover" />
+              <img src={resolveImageUrl(c.image)} alt={c.name} className="img-editorial aspect-[3/2] w-full object-cover" />
             </div>
           )}
           <div className="flex items-center gap-3">

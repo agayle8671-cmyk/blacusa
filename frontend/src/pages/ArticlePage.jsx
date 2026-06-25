@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowLeft } from "lucide-react";
-import { getArticle } from "@/lib/api";
+import { getArticle, resolveImageUrl } from "@/lib/api";
 import { ArticleCard } from "@/components/ArticleCard";
 import { CommentSection } from "@/components/CommentSection";
 
@@ -61,7 +61,7 @@ export default function ArticlePage() {
 
       <div className="mx-auto mt-10 max-w-4xl px-6">
         <div className="overflow-hidden">
-          <img src={article.image} alt={article.title} className="img-editorial aspect-[16/9] w-full object-cover" />
+          <img src={resolveImageUrl(article.image)} alt={article.title} className="img-editorial aspect-[16/9] w-full object-cover" />
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { resolveImageUrl } from "@/lib/api";
 
 const CAT_LABEL = {
   "politics": "Politics",
@@ -25,7 +26,7 @@ export const ArticleCard = ({ article, variant = "standard" }) => {
       <Link to={to} data-testid={`article-feature-${article.slug}`} className="group block">
         <div className="overflow-hidden">
           <img
-            src={article.image}
+            src={resolveImageUrl(article.image)}
             alt={article.title}
             className="img-editorial aspect-[16/10] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
           />
@@ -69,7 +70,7 @@ export const ArticleCard = ({ article, variant = "standard" }) => {
     <Link to={to} data-testid={`article-card-${article.slug}`} className="group flex flex-col">
       <div className="overflow-hidden">
         <img
-          src={article.image}
+          src={resolveImageUrl(article.image)}
           alt={article.title}
           className="img-editorial aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         />

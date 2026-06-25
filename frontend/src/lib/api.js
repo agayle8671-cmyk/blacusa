@@ -42,3 +42,13 @@ export const joinMembership = (payload) =>
 
 export const subscribe = (payload) =>
   client.post("/subscribe", payload).then((r) => r.data);
+
+export const resolveImageUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  const baseUrl = BACKEND_URL ? BACKEND_URL.replace(/\/+$/, "") : "";
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${baseUrl}${cleanUrl}`;
+};
