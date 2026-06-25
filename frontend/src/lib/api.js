@@ -45,10 +45,12 @@ export const subscribe = (payload) =>
 
 export const resolveImageUrl = (url) => {
   if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
-    return url;
+  let resolved = url;
+  if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("data:")) {
+    const baseUrl = BACKEND_URL ? BACKEND_URL.replace(/\/+$/, "") : "";
+    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+    resolved = `${baseUrl}${cleanUrl}`;
   }
-  const baseUrl = BACKEND_URL ? BACKEND_URL.replace(/\/+$/, "") : "";
-  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
-  return `${baseUrl}${cleanUrl}`;
+  console.log(`[resolveImageUrl] "${url}" -> "${resolved}"`);
+  return resolved;
 };
