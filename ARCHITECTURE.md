@@ -34,16 +34,19 @@ Editorial pillars: Politics, Health Equity, Criminal Justice, Environmental Raci
 | Images | Pillow (resize/compress) + Emergent object storage (via `requests`, offloaded with `asyncio.to_thread`) |
 | Database | MongoDB (single database, name from `DB_NAME`) |
 
-### Process / hosting model (this environment)
-- **Backend** runs on `0.0.0.0:8001` (supervisor-managed). **All API routes are prefixed with `/api`** and exposed externally through Kubernetes ingress.
-- **Frontend** runs on port `3000` (supervisor-managed) with hot reload.
-- The frontend calls the backend **only** via `process.env.REACT_APP_BACKEND_URL` + `/api/...`. Never hardcode URLs.
-- The owner deploys to **Railway (backend) + Vercel (frontend)** in production.
-- Supervisor restart: `sudo supervisorctl restart backend|frontend` (only needed after `.env` or dependency changes; code changes hot-reload).
+### Process / hosting model & Production Deployment
+- **Backend** runs on `0.0.0.0:8001` (supervisor-managed). **All API routes are prefixed with `/api`** and exposed externally. In production, it is hosted on **Railway**.
+- **Frontend** runs on port `3000` (supervisor-managed) locally. In production, it is hosted on **Vercel** (with the root directory set to `frontend/`).
+- **Node.js Target Version:** Set to **Node 18** via `.nvmrc` in both the root and `frontend/` folders. This is required because React 19 / `react-scripts` 5 / `craco` 7 are incompatible with Node 24+ (Vercel's default).
+- **Yarn Lockfile requirement:** The frontend's `yarn.lock` must be checked into git to force Vercel to install using **Yarn**. This is critical because Yarn resolves the `"resolutions"` block in `package.json` to settle package conflicts (like the `ajv` version conflict that crashes standard `npm` builds).
+- **CORS Credentials vs. Wildcards:** In Starlette/FastAPI, `allow_credentials=True` cannot be used with a wildcard origin `allow_origins=["*"]`. To support all Vercel preview branches, localhost, and production URLs, the backend uses `allow_origin_regex` to match origins dynamically:
+  - If `CORS_ORIGINS` is `*`, it matches `https?://.*`.
+  - If `CORS_ORIGINS` is restricted, it matches `https?://.*\.vercel\.app|https?://localhost(:\d+)?|https?://127\.0\.0\.1(:\d+)?` alongside explicitly listed domains.
+- **Image URL Resolution:** Uploaded images use relative paths (`/api/files/...`). To prevent the browser from requesting them from the Vercel domain instead of the Railway server, the frontend uses a `resolveImageUrl` helper to prepend the backend URL.
 
 ### Environment variables
-- `backend/.env`: `MONGO_URL`, `DB_NAME` (do not change keys), `CORS_ORIGINS`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `EMERGENT_LLM_KEY` (used to init object storage), `GROQ_API_KEY` (Groq API key — required for AI features and the news scraper).
-- `frontend/.env`: `REACT_APP_BACKEND_URL` (production external URL — do not change).
+- `backend/.env` (Railway Config): `MONGO_URL`, `DB_NAME`, `CORS_ORIGINS` (set to `*` to allow regex matching, or comma-separated domains), `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `EMERGENT_LLM_KEY` (storage init), `GROQ_API_KEY` (AI features).
+- `frontend/.env` (Vercel Config): `REACT_APP_BACKEND_URL` (points to the Railway backend URL without a trailing slash, e.g., `https://blacusa-production.up.railway.app`).
 
 ---
 
@@ -268,5 +271,6 @@ Header shows **"Sign in"** (anonymous) or the reader's first name + sign-out (lo
 - **2026-06 — Iteration 4 (Readers, curation, scheduling, image opt):** **Reader accounts** (register/login) with unified auth context (token key `blacusa-token`); **commenting now requires a verified account**; **homepage curation** (`/admin/homepage`); **scheduled publishing** (`publish_at`) with CMS badge; **image optimization** (≤2000px + compress) and storage calls offloaded via `asyncio.to_thread`. Verified 19/19 new (100%), no functional bugs.
 - **2026-06 — On-brand pass + diagram:** Surfaced the doc's core positioning — header tagline "Algorithm-proof news for Black America", homepage masthead overline "Algorithm-proof journalism · Built for loyal change-seekers"; completed beats in footer (added Rural & The Black Belt); exact CCPA phrasing "Do Not Sell or Share My Personal Information". Added one-page visual system diagram at `/app/SYSTEM_DIAGRAM.html` (print-ready, on-brand).
 - **2026-06 — Iteration 5 (Groq AI CMS + News Scraper):** Integrated **Groq API** (`llama-3.3-70b-versatile`) throughout the Newsroom Console. New `backend/scraper.py` module implements a 5-phase pipeline: RSS discovery (25 sources across Black media ecosystem) → body extraction (httpx + BeautifulSoup4) → relevance filtering → RAG site-memory context injection (MongoDB keyword query of existing articles) → Groq rewrite → editorial draft staging (`is_published: false`). Backend: 4 AI-assist routes (`/admin/ai/draft-from-headline`, `/admin/ai/generate-dek`, `/admin/ai/suggest-tags`, `/admin/ai/improve-paragraph`) + 2 scraper routes (`/admin/scraper/run`, `/admin/scraper/status`) + 24h `asyncio` background loop. Frontend: `AdminArticleEditor` gains AI Assist panel (Draft from Headline CTA, inline Suggest Dek/Tags, Improve Paragraph, Internal Reference Chips from RAG context, Accept/Discard flow); `AdminArticles` gains AI Drafts filter tab, Run Scraper button, real-time scraper status bar, source attribution badges. Requires `GROQ_API_KEY` in `backend/.env`.
+- **2026-06 — Production Deployment & CORS Fixes:** Resolved production deployment issues on Railway and Vercel. 1) Locked Node version to 18 via `.nvmrc` to fix React 19 + `react-scripts` 5 build crashes. 2) Committed `yarn.lock` to force Yarn package management on Vercel, enabling the `resolutions` block to fix nested dependency clashes (like `ajv`). 3) Handled CORS policy constraints dynamically by replacing static `allow_origins=["*"]` with regex matching (`allow_origin_regex`), enabling credentials to pass on Vercel preview environments and local setups. 4) Added a frontend `resolveImageUrl` helper to map relative image paths (`/api/files/...`) back to the Railway host. 5) Created defensive UI state guards and Axios HTML response interceptors to prevent client-side crashes if the backend URL is misconfigured.
 
 > **Reminder:** update §5–§9 and add a Changelog entry whenever behavior changes.
