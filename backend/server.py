@@ -887,7 +887,9 @@ async def admin_delete_comment(comment_id: str, admin: dict = Depends(get_curren
 app.include_router(api_router)
 
 cors_origins_str = os.environ.get('CORS_ORIGINS', '*')
-if cors_origins_str == '*':
+origins = [o.strip() for o in cors_origins_str.split(',') if o.strip()]
+
+if '*' in origins:
     app.add_middleware(
         CORSMiddleware,
         allow_credentials=True,
@@ -899,7 +901,8 @@ else:
     app.add_middleware(
         CORSMiddleware,
         allow_credentials=True,
-        allow_origins=cors_origins_str.split(','),
+        allow_origins=origins,
+        allow_origin_regex=r"https?://.*\.vercel\.app|https?://localhost(:\d+)?|https?://127\.0\.0\.1(:\d+)?",
         allow_methods=["*"],
         allow_headers=["*"],
     )
