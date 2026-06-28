@@ -148,6 +148,60 @@ const INSIGHTS = {
     },
     source: "FBI Uniform Crime Reporting",
   },
+
+  "births-year": {
+    title: "Births, Deaths & Natural Increase",
+    summary:
+      "Roughly 620,000 Black children are born each year while about 445,000 Black Americans die — a natural increase of ~175,000 annually, before migration and re-identification are counted. This steady momentum drives the community's demographic growth.",
+    comparison: {
+      label: "Projected annual totals",
+      unit: "",
+      rows: [
+        { label: "Births / year", value: 620000, accent: true },
+        { label: "Deaths / year", value: 445000, accent: false },
+        { label: "Natural increase", value: 175000, accent: false },
+      ],
+    },
+    source: "Projected from CDC NCHS natality & mortality baselines",
+  },
+
+  "eligible-voters": {
+    title: "The Black Electorate",
+    summary:
+      "An estimated 34.4 million Black Americans are eligible voters in 2024 — 14.0% of the U.S. electorate, slightly exceeding the Black share of the total population. A growing, increasingly Southern electorate translates demographic momentum into civic power.",
+    comparison: {
+      label: "Share of the United States",
+      unit: "%",
+      rows: [
+        { label: "% of U.S. population", value: 13.5, accent: false },
+        { label: "% of U.S. electorate", value: 14.0, accent: true },
+      ],
+    },
+    source: "Pew Research Center / U.S. Census Bureau (2024)",
+  },
+
+  "asthma-er-year": {
+    title: "Pediatric Asthma & Environmental Racism",
+    summary:
+      "Non-Hispanic Black children are roughly twice as likely to have asthma as White children, almost five times more likely to be hospitalized for it, and suffer a mortality rate nearly eight times higher — a direct consequence of housing quality, localized pollution, and unequal care.",
+    comparison: {
+      label: "Risk relative to White children (\u00d7)",
+      unit: "x",
+      rows: [
+        { label: "More likely to have asthma", value: 2, accent: false },
+        { label: "More likely hospitalized", value: 5, accent: false },
+        { label: "Higher asthma mortality", value: 8, accent: true },
+      ],
+    },
+    source: "CDC / HHS Office of Minority Health",
+  },
+
+  "septic-failing": {
+    title: "The Black Belt Sanitation Crisis",
+    summary:
+      "Across Lowndes County, Alabama and the rural Black Belt, impermeable clay soil makes conventional septic systems fail. Health departments estimate that between 40% and 90% of homes rely on failing or straight-piped systems — exposing residents to raw sewage and preventable disease entirely within the United States.",
+    source: "Catherine Coleman Flowers testimony; public-health estimates",
+  },
 };
 
 /* Alias related ticking rows to a shared insight. */
@@ -159,9 +213,20 @@ const ALIASES = {
   "maternal-deaths-year": "maternal-rate",
   "life-gap": "life-expectancy",
   "farmland-acres": "black-farms",
+  "lost-land-value": "black-farms",
+  "farm-share": "black-farms",
   "arrests-year": "arrest-rate",
   "arrests-today": "arrest-rate",
   "incarcerated": "incarc-share",
+  "pop-share": "incarc-share",
+  // population dynamics share one insight
+  "births-today": "births-year",
+  "deaths-year": "births-year",
+  "deaths-today": "births-year",
+  "net-growth-year": "births-year",
+  "net-growth-today": "births-year",
+  // asthma year/today share one insight
+  "asthma-er-today": "asthma-er-year",
 };
 
 export const getInsight = (slug) => {
