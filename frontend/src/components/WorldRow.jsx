@@ -46,11 +46,22 @@ export const WorldRow = ({ row }) => {
             {row.label.link && (
               <>
                 {" "}
-                <span className="wm-link">{row.label.link}</span>
+                {row.sourceUrl ? (
+                  <a
+                    href={row.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="wm-link underline hover:text-accent font-bold"
+                  >
+                    {row.label.link}
+                  </a>
+                ) : (
+                  <span className="wm-link">{row.label.link}</span>
+                )}
               </>
             )}
             {row.label.post && (
-              <span className="text-muted-foreground"> {row.label.post}</span>
+              <span className="text-muted-foreground text-xs italic"> {row.label.post}</span>
             )}
           </p>
 

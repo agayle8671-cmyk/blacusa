@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter, Header, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import UpdateOne
+from pymongo import UpdateOne, UpdateMany
 import os
 import logging
 from pathlib import Path
@@ -10,6 +10,10 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Union
 import uuid
 from datetime import datetime, timezone
+import asyncio
+import urllib.parse
+import xml.etree.ElementTree as ET
+import httpx
 
 from seed_counters import COUNTERS, HERO, TICKER_ITEMS, SECTION_META
 
@@ -110,6 +114,7 @@ def _row_to_public(doc: dict) -> dict:
         "label": label,
         "detail": doc.get("detail"),
         "source": doc.get("source"),
+        "sourceUrl": doc.get("source_url"),
         "dataAsOf": doc.get("data_as_of"),
     }
 
@@ -348,11 +353,156 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# ----------------------- Google News RSS Scraper -----------------------
+OUTLET_MAPPING = {
+    "nyt-subs": "The New York Times",
+    "fox-news-prime": "Fox News",
+    "cnn-visits-today": "CNN",
+    "msnbc-prime": "MSNBC",
+    "abc-evening-news": "ABC News",
+    "nbc-nightly-news": "NBC News",
+    "cbs-evening-news": "CBS News",
+    "wsj-subs": "The Wall Street Journal",
+    "wapo-subs": "The Washington Post",
+    "usa-today-visits": "USA Today",
+    "yahoo-news-visits": "Yahoo News",
+    "msn-news-visits": "MSN",
+    "pbs-trust": "PBS",
+    "npr-listeners": "NPR",
+    "univision-viewers": "Univision",
+    "telemundo-viewers": "Telemundo",
+    "bbc-news-visits": "BBC News",
+    "guardian-us-visits": "The Guardian",
+    "reuters-visits": "Reuters",
+    "ap-visits": "Associated Press",
+    "ny-post-visits": "New York Post",
+    "huffpost-visits": "HuffPost",
+    "bloomberg-visits": "Bloomberg",
+    "cnbc-visits": "CNBC",
+    "newsweek-visits": "Newsweek",
+}
+
+KEYWORDS = '("Black America" OR "Black Americans" OR "Black people" OR "African American" OR "racial" OR "civil rights" OR "segregation" OR "diversity")'
+
+def format_relative_time(pub_date_str: str) -> str:
+    try:
+        clean_str = pub_date_str.rsplit(" ", 1)[0]
+        dt = datetime.strptime(clean_str, "%a, %d %b %Y %H:%M:%S")
+        now = datetime.utcnow()
+        diff = now - dt
+        hours = int(diff.total_seconds() / 3600)
+        if hours < 1:
+            mins = int(diff.total_seconds() / 60)
+            return f"({mins}m ago)"
+        elif hours < 24:
+            return f"({hours}h ago)"
+        else:
+            days = diff.days
+            return f"({days}d ago)"
+    except Exception:
+        return ""
+
+async def fetch_latest_headline(outlet_name: str):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    # Try keywords query
+    q = f'source:"{outlet_name}" {KEYWORDS}'
+    url = f"https://news.google.com/rss/search?q={urllib.parse.quote(q)}&hl=en-US&gl=US&ceid=US:en"
+    
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
+            r = await client.get(url, headers=headers)
+            if r.status_code == 200:
+                root = ET.fromstring(r.text)
+                items = root.findall(".//item")
+                if items:
+                    title = items[0].find("title").text
+                    if " - " in title:
+                        title = title.rsplit(" - ", 1)[0]
+                    pub_date = items[0].find("pubDate").text
+                    link = items[0].find("link").text
+                    return title, pub_date, link
+        except Exception as e:
+            logger.error("Error scraping keywords for %s: %s", outlet_name, e)
+
+    # Try general fallback query
+    q_fallback = f'source:"{outlet_name}"'
+    url_fallback = f"https://news.google.com/rss/search?q={urllib.parse.quote(q_fallback)}&hl=en-US&gl=US&ceid=US:en"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
+            r = await client.get(url_fallback, headers=headers)
+            if r.status_code == 200:
+                root = ET.fromstring(r.text)
+                items = root.findall(".//item")
+                if items:
+                    title = items[0].find("title").text
+                    if " - " in title:
+                        title = title.rsplit(" - ", 1)[0]
+                    pub_date = items[0].find("pubDate").text
+                    link = items[0].find("link").text
+                    return title, pub_date, link
+        except Exception as e:
+            logger.error("Error scraping fallback for %s: %s", outlet_name, e)
+            
+    return None, None, None
+
+async def update_all_headlines():
+    logger.info("Starting background news headline scraper...")
+    for slug, outlet_name in OUTLET_MAPPING.items():
+        try:
+            title, pub_date, link = await fetch_latest_headline(outlet_name)
+            if title:
+                relative_time = format_relative_time(pub_date)
+                original = await db.live_counters.find_one({"metric_slug": slug})
+                detail = ""
+                source = ""
+                if original:
+                    orig_detail = original.get("detail", "")
+                    if "\n\nSource Link:" in orig_detail:
+                        detail = orig_detail.split("\n\nSource Link:")[0]
+                    else:
+                        detail = orig_detail
+                    source = original.get("source", "")
+                
+                detail_with_link = f"{detail}\n\nSource Link: {link}" if link else detail
+                
+                await db.live_counters.update_one(
+                    {"metric_slug": slug},
+                    {
+                        "$set": {
+                            "value_type": "static",
+                            "static_value": outlet_name,
+                            "label_pre": title,
+                            "label_link": "Read article",
+                            "label_post": f" {relative_time}" if relative_time else "",
+                            "detail": detail_with_link,
+                            "source_url": link
+                        }
+                    }
+                )
+                logger.info("Updated %s with headline: %s", outlet_name, title)
+            await asyncio.sleep(0.5) # Avoid rate limiting
+        except Exception as e:
+            logger.error("Error updating headline for %s: %s", outlet_name, e)
+    logger.info("Finished background news headline scraper.")
+
+async def news_scraper_loop():
+    while True:
+        try:
+            await update_all_headlines()
+        except Exception as e:
+            logger.error("Error in news scraper loop: %s", e)
+        await asyncio.sleep(3600) # Run hourly
+
+
 @app.on_event("startup")
 async def on_startup():
     await seed_counters()
+    asyncio.create_task(news_scraper_loop())
 
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
