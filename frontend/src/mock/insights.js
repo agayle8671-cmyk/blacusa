@@ -202,7 +202,41 @@ const INSIGHTS = {
       "Across Lowndes County, Alabama and the rural Black Belt, impermeable clay soil makes conventional septic systems fail. Health departments estimate that between 40% and 90% of homes rely on failing or straight-piped systems — exposing residents to raw sewage and preventable disease entirely within the United States.",
     source: "Catherine Coleman Flowers testimony; public-health estimates",
   },
+
+  "newsroom-diversity": {
+    title: "Newsroom Leadership vs. National Demographics",
+    summary:
+      "While these publications and networks reach hundreds of millions of Americans daily, their leadership and reporting ranks remain overwhelmingly homogenous. White journalists hold 83.7% of supervisor roles and 78% of top leadership positions in North American newsrooms. Meanwhile, only 6% of reporting journalists are Black, contributing directly to coverage blind spots.",
+    comparison: {
+      label: "Share of positions held (%)",
+      unit: "%",
+      rows: [
+        { label: "White Supervisors", value: 83.7, accent: false },
+        { label: "Black Journalists", value: 6.0, accent: true },
+        { label: "Black Population", value: 13.6, accent: false },
+      ]
+    },
+    source: "CAJ Diversity Survey / Pew Research (2022-2024)"
+  },
+
+  "media-distrust": {
+    title: "The Crisis of Trust and Coverage Bias",
+    summary:
+      "Television news dominates Black American media consumption, yet 88% of Black adults report encountering inaccurate news about their communities, with 73% believing those inaccuracies are intentional. Furthermore, 63% feel that news coverage of Black people is disproportionately negative compared to other racial groups.",
+    comparison: {
+      label: "Perceptions of Media Coverage",
+      unit: "%",
+      rows: [
+        { label: "Encounter inaccurate news", value: 88, accent: true },
+        { label: "Believe inaccuracies are intentional", value: 73, accent: true },
+        { label: "Coverage is disproportionately negative", value: 63, accent: true },
+        { label: "Media designed to hold Black people back", value: 52, accent: true },
+      ]
+    },
+    source: "Pew Research Center / Center for Media Engagement (2023-2024)"
+  },
 };
+
 
 /* Alias related ticking rows to a shared insight. */
 const ALIASES = {
@@ -227,7 +261,37 @@ const ALIASES = {
   "net-growth-today": "births-year",
   // asthma year/today share one insight
   "asthma-er-today": "asthma-er-year",
+
+  // newsroom diversity mappings
+  "wapo-subs": "newsroom-diversity",
+  "nyt-subs": "newsroom-diversity",
+  "wsj-subs": "newsroom-diversity",
+  "abc-evening-news": "newsroom-diversity",
+  "nbc-nightly-news": "newsroom-diversity",
+  "cbs-evening-news": "newsroom-diversity",
+  "usa-today-visits": "newsroom-diversity",
+  "ny-post-visits": "newsroom-diversity",
+  "huffpost-visits": "newsroom-diversity",
+  "bloomberg-visits": "newsroom-diversity",
+  "cnbc-visits": "newsroom-diversity",
+  "newsweek-visits": "newsroom-diversity",
+  "univision-viewers": "newsroom-diversity",
+  "telemundo-viewers": "newsroom-diversity",
+  "bbc-news-visits": "newsroom-diversity",
+  "guardian-us-visits": "newsroom-diversity",
+  "reuters-visits": "newsroom-diversity",
+  "ap-visits": "newsroom-diversity",
+
+  // media distrust mappings
+  "fox-news-prime": "media-distrust",
+  "cnn-visits-today": "media-distrust",
+  "msnbc-prime": "media-distrust",
+  "yahoo-news-visits": "media-distrust",
+  "msn-news-visits": "media-distrust",
+  "pbs-trust": "media-distrust",
+  "npr-listeners": "media-distrust",
 };
+
 
 export const getInsight = (slug) => {
   if (!slug) return null;
