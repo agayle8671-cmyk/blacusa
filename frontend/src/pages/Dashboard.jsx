@@ -1,14 +1,12 @@
 import React from "react";
-import { Hero } from "@/components/Hero";
 import { Section } from "@/components/Section";
 import { useCounters } from "@/context/CountersContext";
 
 export default function Dashboard() {
   const { sections } = useCounters();
   return (
-    <main className="mx-auto max-w-[980px] px-4 pb-20">
-      <Hero />
-      <div className="pt-10">
+    <main className="mx-auto max-w-[940px] px-4 pb-20 pt-8">
+      <div>
         {sections.map((section) => (
           <Section key={section.key} section={section} />
         ))}

@@ -17,55 +17,58 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-[60px] max-w-[980px] items-center justify-between px-4">
-        {/* Wordmark */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="wm flex items-baseline text-[26px] font-light tracking-tight"
-          data-testid="logo"
-        >
-          <span className="text-foreground">blac</span>
-          <span className="font-semibold text-accent">usa</span>
-        </button>
-
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 md:flex">
+      <div className="mx-auto flex h-[58px] max-w-[1080px] items-center justify-between px-4">
+        {/* Left cluster: logo + Population + More (worldometer layout) */}
+        <div className="flex items-center gap-6">
           <button
-            onClick={() => go("demographics")}
-            className="wm text-[15px] text-foreground transition-colors hover:text-accent"
-            data-testid="nav-population"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="wm flex items-baseline text-[27px] font-light tracking-tight"
+            data-testid="logo"
           >
-            Population
+            <span className="text-[#7a7a7a]">blac</span>
+            <span className="font-semibold text-accent">usa</span>
           </button>
 
-          <div className="relative">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-5 md:flex">
             <button
-              onClick={() => setMoreOpen((v) => !v)}
-              className="wm flex items-center gap-1 border border-border px-3 py-1.5 text-[15px] text-foreground transition-colors hover:bg-muted"
-              data-testid="nav-more"
+              onClick={() => go("demographics")}
+              className="wm text-[15px] text-foreground transition-colors hover:text-accent"
+              data-testid="nav-population"
             >
-              More <ChevronDown size={15} />
+              Population
             </button>
-            {moreOpen && (
-              <div className="absolute right-0 mt-1 w-64 border border-border bg-card shadow-lg">
-                {SECTIONS.map((s) => (
-                  <button
-                    key={s.key}
-                    onClick={() => go(s.key)}
-                    className="wm block w-full px-4 py-2.5 text-left text-[14px] text-foreground transition-colors hover:bg-muted"
-                    data-testid={`more-${s.key}`}
-                  >
-                    {s.title}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <div className="wm flex items-center gap-1.5 text-[15px] text-foreground">
-            <Languages size={16} /> English
-          </div>
-        </nav>
+            <div className="relative">
+              <button
+                onClick={() => setMoreOpen((v) => !v)}
+                className="wm flex items-center gap-1 border border-border px-3 py-1.5 text-[15px] text-foreground transition-colors hover:bg-muted"
+                data-testid="nav-more"
+              >
+                More <ChevronDown size={15} />
+              </button>
+              {moreOpen && (
+                <div className="absolute left-0 mt-1 w-64 border border-border bg-card shadow-lg">
+                  {SECTIONS.map((s) => (
+                    <button
+                      key={s.key}
+                      onClick={() => go(s.key)}
+                      className="wm block w-full px-4 py-2.5 text-left text-[14px] text-foreground transition-colors hover:bg-muted"
+                      data-testid={`more-${s.key}`}
+                    >
+                      {s.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </nav>
+        </div>
+
+        {/* Right: language */}
+        <div className="hidden wm items-center gap-1.5 text-[15px] text-foreground md:flex">
+          <Languages size={16} /> English
+        </div>
 
         {/* Mobile toggle */}
         <button

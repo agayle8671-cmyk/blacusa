@@ -26,7 +26,7 @@ export const WorldRow = ({ row }) => {
     <div className="wm" data-testid={`row-${row.slug}`}>
       <div className="flex items-start">
         {/* number cell */}
-        <div className="w-[44%] shrink-0 border-b border-border pr-5 pb-2 pt-2 text-right text-[17px] font-bold leading-tight text-foreground">
+        <div className="w-[44%] shrink-0 border-b border-border pr-5 pb-2 pt-2 text-right text-[16px] font-bold leading-tight text-foreground">
           {row.static ? (
             <span className="tnums">{row.static}</span>
           ) : (
@@ -36,7 +36,7 @@ export const WorldRow = ({ row }) => {
 
         {/* label cell */}
         <div className="flex flex-1 items-start justify-between pl-5 pt-2">
-          <p className="text-[17px] leading-snug text-foreground">
+          <p className="text-[16px] leading-snug text-foreground">
             {row.label.pre}
             {row.label.link && (
               <>
@@ -55,7 +55,7 @@ export const WorldRow = ({ row }) => {
               onClick={() => setOpen((v) => !v)}
               aria-label="Toggle details"
               data-testid={`expand-${row.slug}`}
-              className="ml-3 mt-0.5 shrink-0 border border-border px-1.5 text-[11px] font-mono leading-5 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+              className="ml-3 mt-0.5 shrink-0 font-mono text-[13px] leading-5 text-[#bdbdbd] transition-colors hover:text-foreground"
             >
               {open ? "[–]" : "[+]"}
             </button>
