@@ -336,7 +336,9 @@ async def get_status_checks():
     return [StatusCheck(**s) for s in status_checks]
 
 
-app.include_router(api_router)
+# NOTE: app.include_router(api_router) is called AFTER all routes are defined
+# (see bottom of file). Moving it here would cause routes defined later to be
+# invisible to FastAPI.
 
 app.add_middleware(
     CORSMiddleware,
@@ -597,6 +599,12 @@ async def force_refresh_headlines():
     asyncio.create_task(run_headline_scraper())
     return {"status": "refresh_started", "outlets": len(OUTLET_MAPPING)}
 
+
+# =====================================================================
+# Router registration — MUST be after all @api_router decorators above
+# =====================================================================
+
+app.include_router(api_router)
 
 # =====================================================================
 # App lifecycle
