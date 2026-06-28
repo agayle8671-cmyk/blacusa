@@ -363,32 +363,33 @@ logger = logging.getLogger(__name__)
 # =====================================================================
 
 OUTLET_MAPPING = {
-    "nyt-subs":          "The New York Times",
-    "fox-news-prime":    "Fox News",
-    "cnn-visits-today":  "CNN",
-    "msnbc-prime":       "MSNBC",
-    "abc-evening-news":  "ABC News",
-    "nbc-nightly-news":  "NBC News",
-    "cbs-evening-news":  "CBS News",
-    "wsj-subs":          "The Wall Street Journal",
-    "wapo-subs":         "The Washington Post",
-    "usa-today-visits":  "USA Today",
-    "yahoo-news-visits": "Yahoo News",
-    "msn-news-visits":   "MSN",
-    "pbs-trust":         "PBS NewsHour",
-    "npr-listeners":     "NPR",
-    "univision-viewers": "Univision",
-    "telemundo-viewers": "Telemundo",
-    "bbc-news-visits":   "BBC News",
-    "guardian-us-visits":"The Guardian",
-    "reuters-visits":    "Reuters",
-    "ap-visits":         "Associated Press",
-    "ny-post-visits":    "New York Post",
-    "huffpost-visits":   "HuffPost",
-    "bloomberg-visits":  "Bloomberg",
-    "cnbc-visits":       "CNBC",
-    "newsweek-visits":   "Newsweek",
+    "wabc-ny": "WABC-TV",
+    "ktla-ca": "KTLA",
+    "wfaa-tx": "WFAA",
+    "wsb-ga": "WSB-TV",
+    "wgn-il": "WGN-TV",
+    "wpvi-pa": "WPVI",
+    "wxyz-mi": "WXYZ",
+    "wral-nc": "WRAL",
+    "wplg-fl": "WPLG",
+    "wews-oh": "WEWS",
+    "king-wa": "KING 5",
+    "wcvb-ma": "WCVB",
+    "kpnx-az": "KPNX",
+    "wthr-in": "WTHR",
+    "wmc-tn": "WMC-TV",
+    "ksdk-mo": "KSDK",
+    "wbal-md": "WBAL-TV",
+    "kusa-co": "KUSA",
+    "wcco-mn": "WCCO",
+    "wtmj-wi": "WTMJ-TV",
+    "wwl-la": "WWL-TV",
+    "wbrc-al": "WBRC",
+    "wavy-va": "WAVY-TV",
+    "wis-sc": "WIS-TV",
+    "wlbt-ms": "WLBT",
 }
+
 
 # Priority keyword search — most likely to return relevant results first
 KEYWORD_VARIANTS = [
@@ -613,8 +614,21 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def on_startup():
     await seed_counters()
+    
+    # Clean up old news outlet counters and headlines
+    from seed_counters import COUNTERS
+    new_outlet_slugs = {c["metric_slug"] for c in COUNTERS if c["category"] == "news-outlets"}
+    await db.live_counters.delete_many({
+        "category": "news-outlets",
+        "metric_slug": {"$nin": list(new_outlet_slugs)}
+    })
+    await db.news_headlines.delete_many({
+        "slug": {"$nin": list(new_outlet_slugs)}
+    })
+    
     # Launch headline scraper immediately in the background; never blocks startup
     asyncio.create_task(headline_scraper_loop())
+
 
 
 @app.on_event("shutdown")

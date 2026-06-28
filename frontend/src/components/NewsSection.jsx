@@ -16,34 +16,35 @@ import { useHeadlines } from "@/hooks/useHeadlines";
 import { hasInsight } from "@/mock/insights";
 import { SpotlightDialog } from "@/components/SpotlightDialog";
 
-// The 25 news outlets in display order — static config, no network needed
+// The 25 local news outlets in display order — static config, no network needed
 const OUTLETS = [
-  { slug: "nyt-subs",          name: "The New York Times" },
-  { slug: "fox-news-prime",    name: "Fox News Channel" },
-  { slug: "cnn-visits-today",  name: "CNN" },
-  { slug: "msnbc-prime",       name: "MSNBC" },
-  { slug: "abc-evening-news",  name: "ABC News" },
-  { slug: "nbc-nightly-news",  name: "NBC News" },
-  { slug: "cbs-evening-news",  name: "CBS News" },
-  { slug: "wsj-subs",          name: "The Wall Street Journal" },
-  { slug: "wapo-subs",         name: "The Washington Post" },
-  { slug: "usa-today-visits",  name: "USA Today" },
-  { slug: "yahoo-news-visits", name: "Yahoo News" },
-  { slug: "msn-news-visits",   name: "MSN News" },
-  { slug: "pbs-trust",         name: "PBS NewsHour" },
-  { slug: "npr-listeners",     name: "NPR" },
-  { slug: "univision-viewers", name: "Univision" },
-  { slug: "telemundo-viewers", name: "Telemundo" },
-  { slug: "bbc-news-visits",   name: "BBC News" },
-  { slug: "guardian-us-visits",name: "The Guardian" },
-  { slug: "reuters-visits",    name: "Reuters" },
-  { slug: "ap-visits",         name: "Associated Press" },
-  { slug: "ny-post-visits",    name: "New York Post" },
-  { slug: "huffpost-visits",   name: "HuffPost" },
-  { slug: "bloomberg-visits",  name: "Bloomberg" },
-  { slug: "cnbc-visits",       name: "CNBC" },
-  { slug: "newsweek-visits",   name: "Newsweek" },
+  { slug: "wabc-ny",           name: "WABC-TV (New York)" },
+  { slug: "ktla-ca",           name: "KTLA (California)" },
+  { slug: "wfaa-tx",           name: "WFAA (Texas)" },
+  { slug: "wsb-ga",            name: "WSB-TV (Georgia)" },
+  { slug: "wgn-il",            name: "WGN-TV (Illinois)" },
+  { slug: "wpvi-pa",           name: "WPVI (Pennsylvania)" },
+  { slug: "wxyz-mi",           name: "WXYZ (Michigan)" },
+  { slug: "wral-nc",           name: "WRAL (North Carolina)" },
+  { slug: "wplg-fl",           name: "WPLG (Florida)" },
+  { slug: "wews-oh",           name: "WEWS (Ohio)" },
+  { slug: "king-wa",           name: "KING 5 (Washington)" },
+  { slug: "wcvb-ma",           name: "WCVB (Massachusetts)" },
+  { slug: "kpnx-az",           name: "KPNX (Arizona)" },
+  { slug: "wthr-in",           name: "WTHR (Indiana)" },
+  { slug: "wmc-tn",            name: "WMC-TV (Tennessee)" },
+  { slug: "ksdk-mo",           name: "KSDK (Missouri)" },
+  { slug: "wbal-md",           name: "WBAL-TV (Maryland)" },
+  { slug: "kusa-co",           name: "KUSA (Colorado)" },
+  { slug: "wcco-mn",           name: "WCCO (Minnesota)" },
+  { slug: "wtmj-wi",           name: "WTMJ-TV (Wisconsin)" },
+  { slug: "wwl-la",            name: "WWL-TV (Louisiana)" },
+  { slug: "wbrc-al",           name: "WBRC (Alabama)" },
+  { slug: "wavy-va",           name: "WAVY-TV (Virginia)" },
+  { slug: "wis-sc",            name: "WIS-TV (South Carolina)" },
+  { slug: "wlbt-ms",           name: "WLBT (Mississippi)" },
 ];
+
 
 function HeadlineRow({ outlet, headlineData }) {
   const [open, setOpen] = useState(false);
