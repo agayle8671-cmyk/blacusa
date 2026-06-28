@@ -60,6 +60,7 @@ def _live(slug, category, order, pre, value, kind, rate, **kw):
         "label_post": kw.get("post"),
         "detail": kw.get("detail"),
         "source": kw.get("source"),
+        "data_as_of": kw.get("as_of"),
     }
 
 
@@ -82,6 +83,7 @@ def _static(slug, category, order, pre, static_value, **kw):
         "label_post": kw.get("post"),
         "detail": kw.get("detail"),
         "source": kw.get("source"),
+        "data_as_of": kw.get("as_of"),
     }
 
 
