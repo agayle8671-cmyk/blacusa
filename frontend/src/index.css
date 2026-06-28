@@ -105,38 +105,4 @@
     opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-
-  .vertical-ticker-viewport {
-    position: relative;
-    height: 80vh;
-    overflow: hidden;
-    perspective: 1200px;
-    perspective-origin: 50% 20%;
-    
-    /* SVG mask for the curved tornado funnel + vertical fading */
-    -webkit-mask-image: url(#tornado-mask);
-    mask-image: url(#tornado-mask);
-  }
-
-  .vertical-ticker-track {
-    will-change: transform;
-    transform-style: preserve-3d;
-    /* Tilt the entire track backward so the bottom is further away and naturally skinnier */
-    transform: rotateX(-14deg);
-    /* Sway the track back and forth like a real active tornado funnel */
-    animation: tornado-sway 9s ease-in-out infinite;
-  }
-
-  @keyframes tornado-sway {
-    0%, 100% {
-      transform: rotateX(-14deg) rotateY(0deg) translateX(0);
-    }
-    25% {
-      transform: rotateX(-14deg) rotateY(1.2deg) translateX(12px);
-    }
-    75% {
-      transform: rotateX(-14deg) rotateY(-1.2deg) translateX(-12px);
-    }
-  }
 }
-
