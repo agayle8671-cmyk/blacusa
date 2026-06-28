@@ -353,153 +353,260 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ----------------------- Google News RSS Scraper -----------------------
+# =====================================================================
+# NEWS HEADLINE SCRAPER — comprehensive autonomous system
+# Stores headlines in a dedicated `news_headlines` collection so the
+# frontend can fetch them independently of the counters, and they are
+# always fresh without waiting for a full /api/counters round-trip.
+# =====================================================================
+
 OUTLET_MAPPING = {
-    "nyt-subs": "The New York Times",
-    "fox-news-prime": "Fox News",
-    "cnn-visits-today": "CNN",
-    "msnbc-prime": "MSNBC",
-    "abc-evening-news": "ABC News",
-    "nbc-nightly-news": "NBC News",
-    "cbs-evening-news": "CBS News",
-    "wsj-subs": "The Wall Street Journal",
-    "wapo-subs": "The Washington Post",
-    "usa-today-visits": "USA Today",
+    "nyt-subs":          "The New York Times",
+    "fox-news-prime":    "Fox News",
+    "cnn-visits-today":  "CNN",
+    "msnbc-prime":       "MSNBC",
+    "abc-evening-news":  "ABC News",
+    "nbc-nightly-news":  "NBC News",
+    "cbs-evening-news":  "CBS News",
+    "wsj-subs":          "The Wall Street Journal",
+    "wapo-subs":         "The Washington Post",
+    "usa-today-visits":  "USA Today",
     "yahoo-news-visits": "Yahoo News",
-    "msn-news-visits": "MSN",
-    "pbs-trust": "PBS",
-    "npr-listeners": "NPR",
+    "msn-news-visits":   "MSN",
+    "pbs-trust":         "PBS NewsHour",
+    "npr-listeners":     "NPR",
     "univision-viewers": "Univision",
     "telemundo-viewers": "Telemundo",
-    "bbc-news-visits": "BBC News",
-    "guardian-us-visits": "The Guardian",
-    "reuters-visits": "Reuters",
-    "ap-visits": "Associated Press",
-    "ny-post-visits": "New York Post",
-    "huffpost-visits": "HuffPost",
-    "bloomberg-visits": "Bloomberg",
-    "cnbc-visits": "CNBC",
-    "newsweek-visits": "Newsweek",
+    "bbc-news-visits":   "BBC News",
+    "guardian-us-visits":"The Guardian",
+    "reuters-visits":    "Reuters",
+    "ap-visits":         "Associated Press",
+    "ny-post-visits":    "New York Post",
+    "huffpost-visits":   "HuffPost",
+    "bloomberg-visits":  "Bloomberg",
+    "cnbc-visits":       "CNBC",
+    "newsweek-visits":   "Newsweek",
 }
 
-KEYWORDS = '("Black America" OR "Black Americans" OR "Black people" OR "African American" OR "racial" OR "civil rights" OR "segregation" OR "diversity")'
+# Priority keyword search — most likely to return relevant results first
+KEYWORD_VARIANTS = [
+    '"Black America" OR "Black Americans"',
+    '"African American" OR "Black people"',
+    '"racial" OR "civil rights"',
+    '"diversity" OR "segregation" OR "voting rights"',
+]
 
-def format_relative_time(pub_date_str: str) -> str:
+_SCRAPER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+}
+
+SCRAPE_INTERVAL_SECS = 1800  # refresh every 30 minutes
+
+
+def _parse_rss_items(xml_text: str) -> list:
+    """Return list of (title, pub_date, link) from RSS XML text."""
     try:
-        clean_str = pub_date_str.rsplit(" ", 1)[0]
-        dt = datetime.strptime(clean_str, "%a, %d %b %Y %H:%M:%S")
-        now = datetime.utcnow()
-        diff = now - dt
-        hours = int(diff.total_seconds() / 3600)
-        if hours < 1:
-            mins = int(diff.total_seconds() / 60)
-            return f"({mins}m ago)"
-        elif hours < 24:
-            return f"({hours}h ago)"
-        else:
-            days = diff.days
-            return f"({days}d ago)"
+        root = ET.fromstring(xml_text)
+        out = []
+        for item in root.findall(".//item"):
+            t = item.find("title")
+            p = item.find("pubDate")
+            l = item.find("link")
+            if t is not None and t.text:
+                title = t.text.strip()
+                # Strip trailing " - Source Name" appended by Google News
+                if " - " in title:
+                    title = title.rsplit(" - ", 1)[0].strip()
+                out.append({
+                    "title": title,
+                    "pub_date": p.text.strip() if p is not None and p.text else "",
+                    "link": l.text.strip() if l is not None and l.text else "",
+                })
+        return out
     except Exception:
+        return []
+
+
+def _relative_time(pub_date_str: str) -> str:
+    """Convert an RSS pubDate string to a human-readable relative time."""
+    if not pub_date_str:
         return ""
-
-async def fetch_latest_headline(outlet_name: str):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-    # Try keywords query
-    q = f'source:"{outlet_name}" {KEYWORDS}'
-    url = f"https://news.google.com/rss/search?q={urllib.parse.quote(q)}&hl=en-US&gl=US&ceid=US:en"
-    
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    # Try multiple common RSS date formats
+    for fmt in (
+        "%a, %d %b %Y %H:%M:%S %Z",
+        "%a, %d %b %Y %H:%M:%S %z",
+        "%a, %d %b %Y %H:%M:%S",
+    ):
         try:
-            r = await client.get(url, headers=headers)
-            if r.status_code == 200:
-                root = ET.fromstring(r.text)
-                items = root.findall(".//item")
-                if items:
-                    title = items[0].find("title").text
-                    if " - " in title:
-                        title = title.rsplit(" - ", 1)[0]
-                    pub_date = items[0].find("pubDate").text
-                    link = items[0].find("link").text
-                    return title, pub_date, link
-        except Exception as e:
-            logger.error("Error scraping keywords for %s: %s", outlet_name, e)
+            dt = datetime.strptime(pub_date_str.strip(), fmt)
+            # Make naive (UTC)
+            if dt.tzinfo is not None:
+                dt = dt.replace(tzinfo=None)
+            diff = datetime.utcnow() - dt
+            total_secs = diff.total_seconds()
+            if total_secs < 0:
+                return "just now"
+            if total_secs < 3600:
+                return f"{int(total_secs // 60)}m ago"
+            if total_secs < 86400:
+                return f"{int(total_secs // 3600)}h ago"
+            return f"{diff.days}d ago"
+        except ValueError:
+            continue
+    return ""
 
-    # Try general fallback query
-    q_fallback = f'source:"{outlet_name}"'
-    url_fallback = f"https://news.google.com/rss/search?q={urllib.parse.quote(q_fallback)}&hl=en-US&gl=US&ceid=US:en"
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            r = await client.get(url_fallback, headers=headers)
-            if r.status_code == 200:
-                root = ET.fromstring(r.text)
-                items = root.findall(".//item")
-                if items:
-                    title = items[0].find("title").text
-                    if " - " in title:
-                        title = title.rsplit(" - ", 1)[0]
-                    pub_date = items[0].find("pubDate").text
-                    link = items[0].find("link").text
-                    return title, pub_date, link
-        except Exception as e:
-            logger.error("Error scraping fallback for %s: %s", outlet_name, e)
-            
-    return None, None, None
 
-async def update_all_headlines():
-    logger.info("Starting background news headline scraper...")
+async def _google_news_rss(query: str) -> list:
+    """Fetch and parse a Google News RSS search result."""
+    url = (
+        "https://news.google.com/rss/search"
+        f"?q={urllib.parse.quote(query)}"
+        "&hl=en-US&gl=US&ceid=US:en"
+    )
+    try:
+        async with httpx.AsyncClient(timeout=12.0, follow_redirects=True) as client:
+            r = await client.get(url, headers=_SCRAPER_HEADERS)
+            if r.status_code == 200:
+                return _parse_rss_items(r.text)
+    except Exception as e:
+        logger.warning("RSS fetch failed for query '%s': %s", query[:60], e)
+    return []
+
+
+async def scrape_outlet(slug: str, outlet_name: str) -> dict | None:
+    """
+    Try progressively narrower keyword searches for an outlet, then fall back
+    to a general latest-stories query. Returns a headline dict or None.
+    """
+    # 1. Try each keyword variant with the outlet source filter
+    for kw in KEYWORD_VARIANTS:
+        items = await _google_news_rss(f'source:"{outlet_name}" ({kw})')
+        if items:
+            item = items[0]
+            return {
+                "slug": slug,
+                "outlet": outlet_name,
+                "headline": item["title"],
+                "pub_date": item["pub_date"],
+                "relative_time": _relative_time(item["pub_date"]),
+                "url": item["link"],
+                "keyword_matched": True,
+                "scraped_at": datetime.utcnow().isoformat(),
+            }
+        await asyncio.sleep(0.3)
+
+    # 2. Fall back to latest headline from that outlet regardless of topic
+    items = await _google_news_rss(f'source:"{outlet_name}"')
+    if items:
+        item = items[0]
+        return {
+            "slug": slug,
+            "outlet": outlet_name,
+            "headline": item["title"],
+            "pub_date": item["pub_date"],
+            "relative_time": _relative_time(item["pub_date"]),
+            "url": item["link"],
+            "keyword_matched": False,
+            "scraped_at": datetime.utcnow().isoformat(),
+        }
+
+    return None
+
+
+async def run_headline_scraper() -> int:
+    """
+    Scrape all 25 outlets and upsert results into `news_headlines` collection.
+    Returns the number of successfully scraped outlets.
+    """
+    logger.info("[headlines] scraper started — %d outlets", len(OUTLET_MAPPING))
+    count = 0
     for slug, outlet_name in OUTLET_MAPPING.items():
         try:
-            title, pub_date, link = await fetch_latest_headline(outlet_name)
-            if title:
-                relative_time = format_relative_time(pub_date)
-                original = await db.live_counters.find_one({"metric_slug": slug})
-                detail = ""
-                source = ""
-                if original:
-                    orig_detail = original.get("detail", "")
-                    if "\n\nSource Link:" in orig_detail:
-                        detail = orig_detail.split("\n\nSource Link:")[0]
-                    else:
-                        detail = orig_detail
-                    source = original.get("source", "")
-                
-                detail_with_link = f"{detail}\n\nSource Link: {link}" if link else detail
-                
-                await db.live_counters.update_one(
-                    {"metric_slug": slug},
-                    {
-                        "$set": {
-                            "value_type": "static",
-                            "static_value": outlet_name,
-                            "label_pre": title,
-                            "label_link": "Read article",
-                            "label_post": f" {relative_time}" if relative_time else "",
-                            "detail": detail_with_link,
-                            "source_url": link
-                        }
-                    }
+            result = await scrape_outlet(slug, outlet_name)
+            if result:
+                await db.news_headlines.update_one(
+                    {"slug": slug},
+                    {"$set": result},
+                    upsert=True,
                 )
-                logger.info("Updated %s with headline: %s", outlet_name, title)
-            await asyncio.sleep(0.5) # Avoid rate limiting
+                logger.info("[headlines] ✓ %s — %s", outlet_name, result["headline"][:60])
+                count += 1
+            else:
+                logger.warning("[headlines] ✗ no headline found for %s", outlet_name)
+            await asyncio.sleep(0.5)  # polite delay between outlets
         except Exception as e:
-            logger.error("Error updating headline for %s: %s", outlet_name, e)
-    logger.info("Finished background news headline scraper.")
+            logger.error("[headlines] error scraping %s: %s", outlet_name, e)
+    logger.info("[headlines] scraper done — %d/%d outlets updated", count, len(OUTLET_MAPPING))
+    return count
 
-async def news_scraper_loop():
+
+async def headline_scraper_loop():
+    """Background loop: scrape immediately on startup, then every 30 minutes."""
     while True:
         try:
-            await update_all_headlines()
+            await run_headline_scraper()
         except Exception as e:
-            logger.error("Error in news scraper loop: %s", e)
-        await asyncio.sleep(3600) # Run hourly
+            logger.error("[headlines] loop error: %s", e)
+        logger.info("[headlines] next refresh in %d minutes", SCRAPE_INTERVAL_SECS // 60)
+        await asyncio.sleep(SCRAPE_INTERVAL_SECS)
 
+
+# ----------------------- /api/headlines endpoint -----------------------
+
+@api_router.get("/headlines")
+async def get_headlines():
+    """
+    Returns the latest scraped headline for each of the 25 news outlets.
+    The frontend calls this on every page load to always show fresh headlines.
+    Also triggers a background re-scrape if all cached data is older than 35 min.
+    """
+    docs = await db.news_headlines.find({}, {"_id": 0}).to_list(100)
+
+    # Check staleness — if data is old, kick off a background refresh
+    if docs:
+        try:
+            oldest_ts = min(
+                datetime.fromisoformat(d["scraped_at"])
+                for d in docs
+                if d.get("scraped_at")
+            )
+            age_mins = (datetime.utcnow() - oldest_ts).total_seconds() / 60
+            if age_mins > 35:
+                logger.info("[headlines] cache is %.0f min old — triggering background refresh", age_mins)
+                asyncio.create_task(run_headline_scraper())
+        except Exception:
+            pass
+
+    # Return keyed by slug for easy frontend lookup
+    by_slug = {d["slug"]: d for d in docs if d.get("slug")}
+    return {
+        "headlines": by_slug,
+        "total": len(by_slug),
+        "last_updated": datetime.utcnow().isoformat(),
+    }
+
+
+@api_router.post("/headlines/refresh")
+async def force_refresh_headlines():
+    """Admin endpoint to manually trigger a full headline scrape."""
+    asyncio.create_task(run_headline_scraper())
+    return {"status": "refresh_started", "outlets": len(OUTLET_MAPPING)}
+
+
+# =====================================================================
+# App lifecycle
+# =====================================================================
 
 @app.on_event("startup")
 async def on_startup():
     await seed_counters()
-    asyncio.create_task(news_scraper_loop())
+    # Launch headline scraper immediately in the background; never blocks startup
+    asyncio.create_task(headline_scraper_loop())
 
 
 @app.on_event("shutdown")
