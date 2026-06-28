@@ -151,54 +151,66 @@ backend:
 frontend:
   - task: "Worldometer-style dashboard renders all sections with live-ticking + static rows"
     implemented: true
-    working: "NA"
+    working: true
     file: "frontend/src/pages/Dashboard.jsx, components/Section.jsx, components/WorldRow.jsx, hooks/useOdometer.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Counters tick via requestAnimationFrame direct-DOM mutation (tabular-nums). Verified visually via screenshot."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED comprehensive UI testing. (1) Hero counter: Displays 'Current Black Population (U.S.)' with value ~50.2M, has comma separators, and TICKS correctly (verified increment from 50,276,101 to 50,276,102 over 20s - correct rate for annualRate 540K/year). (2) All 5 sections render with correct uppercase grey titles: DEMOGRAPHICS & POPULATION, ECONOMIC EQUITY & WEALTH, PUBLIC HEALTH & EQUITY, ENVIRONMENTAL JUSTICE, CRIMINAL LEGAL SYSTEM. (3) Live ticking rows confirmed: row-births-year (302,973→302,974), row-arrests-year (972,448→972,449) both tick correctly. (4) Static rows display correct values: row-black-farms shows 27,128, row-median-wealth-black shows $44,100, row-incarc-share shows 37%. (5) Layout stability confirmed: 33 elements use .tnums class (tabular-nums) preventing horizontal jitter during updates. (6) All 32 rows present across 5 sections. Backend data integration working perfectly - no console errors, all sections populated with real data from /api/counters."
   - task: "Data fetched from /api/counters with mock fallback (CountersContext)"
     implemented: true
-    working: "NA"
+    working: true
     file: "frontend/src/context/CountersContext.jsx, lib/api.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Starts with mock for instant render, swaps in server data on fetch success."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED. Backend integration verified: GET /api/counters successfully fetches and populates all dashboard data. Confirmed 5/5 sections have rows populated from backend. Hero counter receives correct data (baselineValue: 49200000, baselineTimestamp: 2024-07-01T00:00:00, annualRate: 540000). No error elements found on page. Mock fallback strategy working as designed."
   - task: "Header nav (Population scroll, More dropdown, mobile menu) + masthead Ticker"
     implemented: true
-    working: "NA"
+    working: true
     file: "frontend/src/components/Header.jsx, components/Ticker.jsx"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "More dropdown lists sections, clicks smooth-scroll. Ticker is react-fast-marquee."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED. (1) Header nav: 'Population' link (data-testid='nav-population') found and functional. 'More' dropdown (data-testid='nav-more') opens correctly showing all 5 section links (more-demographics, more-economics, more-health, more-environment, more-justice). Clicking 'more-justice' successfully scrolls to Criminal Legal System section. (2) Masthead ticker: 'LIVE' label visible at top of page. Marquee element detected (react-fast-marquee) with scrolling data statements. (3) Mobile menu: Toggle button (data-testid='mobile-toggle') visible at 390px viewport. Opens menu showing all section links. Mobile view fully functional."
   - task: "[+] expander reveals source/detail per row"
     implemented: true
-    working: "NA"
+    working: true
     file: "frontend/src/components/WorldRow.jsx"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Toggles a detail note for rows that have detail text."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED. Expander functionality verified on row-black-population (data-testid='expand-black-population'). Initial state shows '[+]' button. Clicking expander: (1) Detail/source text appears below row. (2) Button text changes to '[–]'. (3) Clicking again collapses detail and button returns to '[+]'. Toggle behavior working perfectly."
 
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
-  run_ui: false
+  test_sequence: 2
+  run_ui: true
 
 test_plan:
   current_focus:
@@ -213,3 +225,5 @@ agent_communication:
     -message: "Backend implemented per the BlacUSA document. Please test GET /api/counters: (1) 200 + shape {hero, sections[], ticker[]}; (2) year_start rows have baselineValue 0 and baselineTimestamp = Jan 1 current year; day_start rows have baselineTimestamp = today's midnight; fixed rows keep stored values; (3) static rows include a 'static' string and no baseline fields requirement; (4) sections ordered demographics, economics, health, environment, justice with rows sorted by order; (5) /api/counters/meta returns counter count. Frontend testing will follow after backend passes."
     -agent: "testing"
     -message: "✅ ALL BACKEND TESTS PASSED (325/325 assertions). Comprehensive testing completed: (1) GET /api/ root endpoint working. (2) POST/GET /api/status endpoints working. (3) GET /api/counters/meta returns correct count (32) and etl_ingestion='stub'. (4) GET /api/counters returns proper structure with hero, sections (ordered: demographics, economics, health, environment, justice), and ticker. (5) All 32 rows present (20 LIVE + 12 STATIC). (6) Baseline resolution is CORRECT: year_start rows reset to Jan 1 2026 with value=0, day_start rows reset to today (2026-06-28) with value=0, fixed rows retain stored values from 2024-07-01. (7) All row schemas validated. Backend is production-ready. Frontend testing NOT performed per system limitations (UI testing excluded). Main agent should summarize and finish."
+    -agent: "testing"
+    -message: "✅ ALL FRONTEND TESTS PASSED. Comprehensive UI testing completed at https://population-pulse-5.preview.emergentagent.com/. All 9 review requirements verified: (1) Hero counter ticking confirmed (50.2M range, comma separators, increments correctly based on 540K/year rate). (2) All 5 sections render with correct titles. (3) Live ticking rows confirmed (births-year, arrests-year), static rows correct (black-farms: 27,128, median-wealth-black: $44,100, incarc-share: 37%). (4) Layout stability verified (33 .tnums elements, no jitter). (5) [+] expander toggles detail text correctly. (6) Header nav works (Population link, More dropdown with 5 sections, scrolling functional). (7) Masthead ticker with 'LIVE' label present. (8) Backend integration perfect (no console errors, all data loaded). (9) Mobile view functional (390px viewport, menu toggle works). Dashboard is production-ready. All 4 frontend tasks marked as working:true."
