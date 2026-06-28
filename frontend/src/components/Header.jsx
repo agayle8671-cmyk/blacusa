@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { ChevronDown, Languages, Menu, X } from "lucide-react";
-import { SECTIONS } from "@/mock/data";
+import { useCounters } from "@/context/CountersContext";
 
 /* Worldometer-style clean white header with two-tone wordmark. */
 export const Header = () => {
+  const { sections: SECTIONS } = useCounters();
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 

@@ -1,7 +1,8 @@
 import React from "react";
-import { SECTIONS } from "@/mock/data";
+import { useCounters } from "@/context/CountersContext";
 
 export const Footer = () => {
+  const { sections: SECTIONS } = useCounters();
   const go = (key) => {
     const el = document.getElementById(key);
     if (el) el.scrollIntoView({ behavior: "smooth" });
