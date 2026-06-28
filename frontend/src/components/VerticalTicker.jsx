@@ -239,17 +239,45 @@ export function VerticalTicker() {
   const handleTouchEnd   = () => { hoverRef.current = false; updatePause(); };
 
   return (
-    <div
-      className="vertical-ticker-viewport"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      <div ref={trackRef} className="vertical-ticker-track">
-        {renderContent("a")}
-        {renderContent("b")}
+    <>
+      {/* Inline SVG definitions for the tornado masking geometry */}
+      <svg style={{ position: "absolute", width: 0, height: 0, pointerEvents: "none" }}>
+        <defs>
+          <linearGradient id="tornado-fade" x1="0" y1="0" x2="0" y2="1">
+            {/* Gases out / dissolves completely at the top cloud area */}
+            <stop offset="0%" stopColor="white" stopOpacity="0" />
+            <stop offset="12%" stopColor="white" stopOpacity="0.4" />
+            <stop offset="35%" stopColor="white" stopOpacity="0.9" />
+            <stop offset="85%" stopColor="white" stopOpacity="1" />
+            {/* Fades to a tip at the very bottom funnel point */}
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
+          </linearGradient>
+          <mask id="tornado-mask" maskContentUnits="objectBoundingBox">
+            {/* 
+              Tornado Funnel Path (0 to 1 bounding coordinates):
+              - Wide top opening (full width)
+              - Quadratic curves narrowing down to a 10% wide base in the center (45% to 55%)
+            */}
+            <path
+              d="M 0 0 Q 0.25 0.35, 0.45 1 L 0.55 1 Q 0.75 0.35, 1 0 Z"
+              fill="url(#tornado-fade)"
+            />
+          </mask>
+        </defs>
+      </svg>
+
+      <div
+        className="vertical-ticker-viewport"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div ref={trackRef} className="vertical-ticker-track">
+          {renderContent("a")}
+          {renderContent("b")}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

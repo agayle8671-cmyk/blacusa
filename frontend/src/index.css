@@ -106,43 +106,37 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* ──────────────────────────────────────────────────────────────────
-     VERTICAL TICKER — GPU-accelerated continuous scroll feed
-     ────────────────────────────────────────────────────────────────── */
-
-  /**
-   * Outer viewport: clips the scrolling track and applies the fade masks.
-   * mask-image makes the top 8% and bottom 8% of the ticker fade to
-   * transparent, blending seamlessly into the page background colour.
-   */
   .vertical-ticker-viewport {
     position: relative;
     height: 80vh;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      black 8%,
-      black 92%,
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      black 8%,
-      black 92%,
-      transparent 100%
-    );
+    perspective: 1200px;
+    perspective-origin: 50% 20%;
+    
+    /* SVG mask for the curved tornado funnel + vertical fading */
+    -webkit-mask-image: url(#tornado-mask);
+    mask-image: url(#tornado-mask);
   }
 
-  /**
-   * Inner track: promoted to its own GPU compositor layer.
-   * The RAF loop animates transform: translate3d(0, -Ypx, 0) directly
-   * on this element's style — bypassing React's render cycle entirely.
-   */
   .vertical-ticker-track {
     will-change: transform;
-    transform: translate3d(0, 0, 0);
+    transform-style: preserve-3d;
+    /* Tilt the entire track backward so the bottom is further away and naturally skinnier */
+    transform: rotateX(-14deg);
+    /* Sway the track back and forth like a real active tornado funnel */
+    animation: tornado-sway 9s ease-in-out infinite;
+  }
+
+  @keyframes tornado-sway {
+    0%, 100% {
+      transform: rotateX(-14deg) rotateY(0deg) translateX(0);
+    }
+    25% {
+      transform: rotateX(-14deg) rotateY(1.2deg) translateX(12px);
+    }
+    75% {
+      transform: rotateX(-14deg) rotateY(-1.2deg) translateX(-12px);
+    }
   }
 }
 
