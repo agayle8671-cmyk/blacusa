@@ -1,5 +1,8 @@
 import React from "react";
+import { TrendingUp } from "lucide-react";
 import { useOdometer } from "@/hooks/useOdometer";
+import { hasInsight } from "@/mock/insights";
+import { SpotlightDialog } from "@/components/SpotlightDialog";
 
 /* A single live-ticking number. Bypasses React render via direct DOM mutation. */
 function LiveNumber({ row }) {
@@ -16,11 +19,13 @@ function LiveNumber({ row }) {
 
 /*
   WorldRow — mirrors a Worldometer dashboard line:
-  [ bold number | underline ]   label (with blue link words)   [+]
+  [ bold number | underline ]   label (with blue link words)   [trend] [+]
 */
 export const WorldRow = ({ row }) => {
   const [open, setOpen] = React.useState(false);
+  const [spotOpen, setSpotOpen] = React.useState(false);
   const hasDetail = Boolean(row.detail);
+  const showSpotlight = hasInsight(row.slug);
 
   return (
     <div className="wm" data-testid={`row-${row.slug}`}>
@@ -49,17 +54,31 @@ export const WorldRow = ({ row }) => {
             )}
           </p>
 
-          {hasDetail && (
-            <button
-              type="button"
-              onClick={() => setOpen((v) => !v)}
-              aria-label="Toggle details"
-              data-testid={`expand-${row.slug}`}
-              className="ml-3 mt-0.5 shrink-0 font-mono text-[13px] leading-5 text-[#bdbdbd] transition-colors hover:text-foreground"
-            >
-              {open ? "[–]" : "[+]"}
-            </button>
-          )}
+          <div className="ml-3 mt-0.5 flex shrink-0 items-center gap-2">
+            {showSpotlight && (
+              <button
+                type="button"
+                onClick={() => setSpotOpen(true)}
+                aria-label="Open disparity spotlight"
+                title="Disparity Spotlight — trend & comparison"
+                data-testid={`spotlight-btn-${row.slug}`}
+                className="text-accent/70 transition-colors hover:text-accent"
+              >
+                <TrendingUp size={15} strokeWidth={2.25} />
+              </button>
+            )}
+            {hasDetail && (
+              <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                aria-label="Toggle details"
+                data-testid={`expand-${row.slug}`}
+                className="font-mono text-[13px] leading-5 text-[#bdbdbd] transition-colors hover:text-foreground"
+              >
+                {open ? "[–]" : "[+]"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -69,6 +88,15 @@ export const WorldRow = ({ row }) => {
             {row.detail}
           </p>
         </div>
+      )}
+
+      {showSpotlight && (
+        <SpotlightDialog
+          open={spotOpen}
+          onOpenChange={setSpotOpen}
+          slug={row.slug}
+          fallbackTitle={row.label.pre}
+        />
       )}
     </div>
   );
