@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  ============================================================
+  BlacUSA THEME TOKENS — single source of truth for color.
+  Each value is "H S% L%" (consumed via hsl(var(--token))).
+  Pan-African inspired but muted, professional, dignified.
+  ============================================================
+*/
+@layer base {
+  :root {
+    --background: 48 20% 97%;
+    --foreground: 0 0% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 43 16% 90%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 43 21% 94%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 5 65% 33%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 5 67% 28%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 16% 84%;
+    --input: 45 16% 84%;
+    --ring: 5 65% 33%;
+    --radius: 0px;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01";
+  }
+  ::selection {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+}
+
+@layer utilities {
+  /* Worldometer-faithful neutral sans + link color */
+  .wm {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  .wm-link {
+    color: #2f6fb0;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .wm-link:hover {
+    color: hsl(var(--accent));
+    text-decoration: underline;
+  }
+  .font-heading {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .overline {
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.7rem;
+  }
+  .tnums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .editorial-rule {
+    background-image: linear-gradient(to right, hsl(var(--foreground)) 33%, transparent 0%);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+  }
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
