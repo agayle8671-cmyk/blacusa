@@ -11,7 +11,7 @@
  */
 
 import React, { useState } from "react";
-import { TrendingUp, RefreshCw, Loader2, Wifi } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { useHeadlines } from "@/hooks/useHeadlines";
 import { hasInsight } from "@/mock/insights";
 import { SpotlightDialog } from "@/components/SpotlightDialog";
@@ -132,13 +132,10 @@ function HeadlineRow({ outlet, headlineData }) {
       {open && hasHeadline && (
         <div className="ml-[44%] animate-fade-in pl-5">
           <p className="border-l-2 border-accent bg-muted/60 px-4 py-2 text-[13px] leading-relaxed text-muted-foreground">
-            <strong>{outlet.name}</strong> ·{" "}
-            {headlineData.keyword_matched
-              ? "Matched Black America keyword search"
-              : "Latest story (no keyword match found)"}
+            <strong>{outlet.name}</strong>
             {headlineData.pub_date && (
               <span className="ml-2 text-xs opacity-70">
-                Published: {headlineData.pub_date}
+                · Published: {headlineData.pub_date}
               </span>
             )}
           </p>
@@ -158,8 +155,7 @@ function HeadlineRow({ outlet, headlineData }) {
 }
 
 export function NewsSection() {
-  const { headlines, loading, error, lastUpdated, refresh } = useHeadlines();
-  const loadedCount = Object.keys(headlines).length;
+  const { headlines, loading, lastUpdated } = useHeadlines();
 
   return (
     <section
@@ -172,52 +168,7 @@ export function NewsSection() {
         <h2 className="wm wm-section text-[19px] font-normal uppercase tracking-[0.02em]">
           News Outlets
         </h2>
-
-        <div className="flex items-center gap-3">
-          {/* Status indicator */}
-          {loading && loadedCount === 0 ? (
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Loader2 size={11} className="animate-spin" />
-              Fetching headlines…
-            </span>
-          ) : loadedCount > 0 ? (
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Wifi size={11} className="text-green-500" />
-              {loadedCount}/25 live
-            </span>
-          ) : error ? (
-            <span className="text-[11px] text-red-400">{error}</span>
-          ) : null}
-
-          {/* Manual refresh button */}
-          <button
-            type="button"
-            onClick={refresh}
-            disabled={loading}
-            title="Refresh headlines now"
-            aria-label="Refresh news headlines"
-            className="flex items-center gap-1 rounded border border-border px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
-          >
-            <RefreshCw
-              size={10}
-              className={loading ? "animate-spin" : ""}
-            />
-            Refresh
-          </button>
-        </div>
       </div>
-
-      {/* Last-updated line */}
-      {lastUpdated && !loading && (
-        <p className="mb-3 text-[11px] italic text-muted-foreground/60">
-          Headlines last refreshed:{" "}
-          {new Date(lastUpdated).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-          {" — "}scraped from Google News RSS · related to Black America
-        </p>
-      )}
 
       {/* Rows */}
       <div>
@@ -232,3 +183,4 @@ export function NewsSection() {
     </section>
   );
 }
+
