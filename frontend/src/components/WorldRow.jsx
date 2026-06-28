@@ -21,7 +21,7 @@ function LiveNumber({ row }) {
   WorldRow — mirrors a Worldometer dashboard line:
   [ bold number | underline ]   label (with blue link words)   [trend] [+]
 */
-export const WorldRow = ({ row }) => {
+export const WorldRow = ({ row, onExpandChange }) => {
   const [open, setOpen] = React.useState(false);
   const [spotOpen, setSpotOpen] = React.useState(false);
   const hasDetail = Boolean(row.detail);
@@ -81,7 +81,13 @@ export const WorldRow = ({ row }) => {
             {hasDetail && (
               <button
                 type="button"
-                onClick={() => setOpen((v) => !v)}
+                onClick={() =>
+                  setOpen((prev) => {
+                    const next = !prev;
+                    onExpandChange?.(next);
+                    return next;
+                  })
+                }
                 aria-label="Toggle details"
                 data-testid={`expand-${row.slug}`}
                 className="font-mono text-[13px] leading-5 text-[#bdbdbd] transition-colors hover:text-foreground"
